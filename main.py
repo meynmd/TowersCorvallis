@@ -53,9 +53,9 @@ heuristicFnDict = {
 class Settings(object):
     def __init__(self):
         self.VERBOSE = False
-        self.MODE = Modes.TEST_BFS
+        self.MODE = Modes.TEST_A_STAR
         self.FILENAME = "perms-3.txt"
-        self.NMAX = 10000
+        self.NMAX = 100
         self.beamWidths = [5]  # , 10, 15, 20, 25, 50, 100] #FIXME handle infinity uniformly somehow?
         self.searchFns = [SearchFns.BFS, SearchFns.DFS, SearchFns.A_STAR, SearchFns.BEAM]
         self.heuristicFns = [HeuristicFns.ADMISSIBLE, HeuristicFns.INADMISSIBLE]

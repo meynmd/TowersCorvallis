@@ -4,7 +4,10 @@ import copy
 class TowerState(object):
     def __init__(self):
         self.solutionDepth = 0
+        self.predecessor = None
+        self.heuristicEstimate = -1
         self.pegs = []
+        self.maxDiscSize = -1
         self.pegCount = 3 # This should be built so that we can change this parameter easily, analog is adding swap space
         for i in range(0, self.pegCount):
             self.pegs = self.pegs + [[]]
@@ -23,7 +26,10 @@ class TowerState(object):
                 print line
                 print "end erroneous line"
             t.addDisc(0, toAdd)
+            if toAdd > t.maxDiscSize:
+                t.maxDiscSize = toAdd
         return t
+
 
     def addDisc(self, pegIdx, discSize):
         self.pegs[pegIdx] = self.pegs[pegIdx] + [discSize]
@@ -49,7 +55,8 @@ class TowerState(object):
     def consolePrint(self):
         if self.pegs:
             print self.pegs,
-            print "solution Depth: " + str(self.solutionDepth)
+            print "solution Depth: " + str(self.solutionDepth),
+            print " heuristic : " + str(self.heuristicEstimate)
 
     def sameState(self, otherState):
         if self.pegCount != otherState.pegCount:
@@ -77,6 +84,7 @@ class TowerState(object):
                     if i == j:
                         continue
                     newState = copy.deepcopy(self)
+                    newState.predecessor = self
                     toAdd = newState.removeDisc(i)
                     newState.addDisc(j, toAdd)
                     childStates = childStates + [newState]
