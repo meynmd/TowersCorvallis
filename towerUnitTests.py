@@ -1,7 +1,8 @@
+# !/usr/bin/python
 import sys
 import math
 from random import randint, seed
-from towerState import TowerState, loadProblemsFromFile
+from towerState import TowerState
 
 def testAddRemove(settings):
     seed(567)
@@ -30,14 +31,6 @@ def testAddRemove(settings):
     tower.removeDisc(0)
     tower.consolePrint()
 
-def testFileLoad(settings):
-    print "\n***** Testing File Load"
-    problemSet = loadProblemsFromFile(settings.FILENAME)
-    for problem in problemSet:
-        problem.consolePrint()
-
-
-
 def testExpandState(settings):
     print "\n***** Testing State Expansion, Initial State"
     seed(6503)
@@ -62,29 +55,3 @@ def testExpandState(settings):
     for i in expanded:
         i.consolePrint()
 
-def testBFS(settings):
-    print "\n***** Testing BFS"
-    problemSet = loadProblemsFromFile(settings.FILENAME)
-
-    problemSet[2].performBFSearch(settings.NMAX, settings.heuristicFns[0])
-
-    #FIXME write this test
-    return
-
-def testDFS(settings):
-    print "\n***** Testing DFS"
-
-    # FIXME write this test
-    return
-
-def testAStarSearch(settings):
-    print "\n***** Testing A* Search"
-
-    # FIXME write this test
-    return
-
-def testBeamSearch(settings):
-    print "\n***** Testing Beam Search"
-
-    # FIXME write this test
-    return

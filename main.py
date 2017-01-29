@@ -1,10 +1,12 @@
 #!/usr/bin/python
-
 import sys
 import math
 from random import randint, seed
-from towerState import TowerState, loadProblemsFromFile
+from towerState import TowerState
 import towerUnitTests
+from searcher import performBFSearch, performDFSearch, performAStarSearch, performBeamSearch
+from heuristicFns import evaluateAdmissible, evaluateInadmissible
+
 
 class Enum(set):
     def __getattr__(self, name):
@@ -12,45 +14,47 @@ class Enum(set):
             return name
         raise AttributeError
 
-Modes = Enum    ([  "TIMING",       # this is the main mode, timing a bunch of functions
+# this enum provides the modes of the program.  Some of them may not be accesible via command line flags
+Modes = Enum([
+    "TIMING",       # this is the main mode, timing a bunch of functions
 
-                    # these are all unit tests
-                    "TEST_ADD_REMOVE",
-                    "TEST_FILE_LOAD",
-                    "TEST_EXPAND_STATE",
-                    "TEST_BFS",
-                    "TEST_DFS",
-                    "TEST_A_STAR",
-                    "TEST_BEAM",
+    # these are all unit tests
+    "TEST_ADD_REMOVE",
+    "TEST_EXPAND_STATE",
+    "TEST_BFS",
+    "TEST_DFS",
+    "TEST_A_STAR",
+    "TEST_BEAM",
 
-                    "TEST_ALL"
+    "TEST_ALL"
+    ])
+
+SearchFns = Enum([  'BFS',
+                    'DFS',
+                    'A_STAR',
+                    'BEAM'
                 ])
-
-SearchFns = Enum   ([           'BFS',
-                                'DFS',
-                                'A_STAR',
-                                'BEAM'
-                    ])
+# This dictionary implements the function table for the enum above
 searchFnDict = {
-    'BFS': TowerState.performBFSearch,
-    'DFS': TowerState.performDFSearch,
-    'A_STAR': TowerState.performAStarSearch,
-    'BEAM': TowerState.performBeamSearch,
+    'BFS': performBFSearch,
+    'DFS': performDFSearch,
+    'A_STAR': performAStarSearch,
+    'BEAM': performBeamSearch,
 }
 
 HeuristicFns = Enum ([          'ADMISSIBLE',
                                 'INADMISSIBLE'
                     ])
 heuristicFnDict = {
-    'ADMISSIBLE': TowerState.evaluateInadmissible,
-    'INADMISSIBLE': TowerState.evaluateAdmissible,
+    'ADMISSIBLE': evaluateAdmissible,
+    'INADMISSIBLE': evaluateInadmissible,
 }
 
 class Settings(object):
     def __init__(self):
         self.VERBOSE = False
-        self.MODE = Modes.TEST_ALL
-        self.FILENAME = "perms-9.txt"
+        self.MODE = Modes.TEST_BFS
+        self.FILENAME = "perms-3.txt"
         self.NMAX = 10000
         self.beamWidths = [5]  # , 10, 15, 20, 25, 50, 100] #FIXME handle infinity uniformly somehow?
         self.searchFns = [SearchFns.BFS, SearchFns.DFS, SearchFns.A_STAR, SearchFns.BEAM]
@@ -145,28 +149,25 @@ elif settings.MODE == Modes.TIMING:
 # Unit tests for basic operations
 elif settings.MODE == Modes.TEST_ADD_REMOVE:
     towerUnitTests.testAddRemove(settings)
-elif settings.MODE == Modes.TEST_FILE_LOAD:
-    towerUnitTests.testFileLoad(settings)
 elif settings.MODE == Modes.TEST_EXPAND_STATE:
     towerUnitTests.testExpandState(settings)
 
 # Unit tests for search Operations
 elif settings.MODE == Modes.TEST_BFS:
-    towerUnitTests.testBFS(settings)
+    performBFSearch(settings)
 elif settings.MODE == Modes.TEST_DFS:
-    towerUnitTests.testDFS(settings)
+    performDFSearch(settings)
 elif settings.MODE == Modes.TEST_A_STAR:
-    towerUnitTests.testAStarSearch(settings)
+    performAStarSearch(settings)
 elif settings.MODE == Modes.TEST_BEAM:
-    towerUnitTests.testBeamSearch(settings)
+    performBeamSearch(settings)
 
 
 
 elif settings.MODE == Modes.TEST_ALL:
     towerUnitTests.testAddRemove(settings)
-    towerUnitTests.testFileLoad(settings)
     towerUnitTests.testExpandState(settings)
-    towerUnitTests.testBFS(settings)
-    towerUnitTests.testDFS(settings)
-    towerUnitTests.testAStarSearch(settings)
-    towerUnitTests.testBeamSearch(settings)
+    performBFSearch(settings)
+    performDFSearch(settings)
+    performAStarSearch(settings)
+    performBeamSearch(settings)
