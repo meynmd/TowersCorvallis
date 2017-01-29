@@ -3,6 +3,14 @@
 import copy
 import time
 
+def loadProblemsFromFile(filename):
+    problems = []
+    lines = [line.rstrip('\n') for line in open(filename)]
+
+    for line in lines[1:]: # use slicing to chop off the first line, since it is header
+        problems = problems + [TowerState.createTowerFromLine(line)]
+    return problems
+
 PEG_COUNT = 3
 
 class TowerState(object):
@@ -60,18 +68,52 @@ class TowerState(object):
                     childStates = childStates + [newState]
         return childStates
 
-    def performSearch(self, NMAX):
+    def evaluateAdmissible(self):
+        heuristicTimeStart = time.time()
+
+        #FIXME define this
+
+        heuristicTimeEnd = time.time()
+        return heuristicTimeEnd - heuristicTimeStart
+
+    def evaluateInadmissible(self):
+        heuristicTimeStart = time.time()
+
+        # FIXME define this
+
+        heuristicTimeEnd = time.time()
+        return heuristicTimeEnd - heuristicTimeStart
+
+    # this function as defined makes no sense, but it shows the expected order of
+    # arguments in the tuple returned by the actual searchers
+    def performBFSearch(self, NMAX, heuristicFn):
+        #print "performing Breadth"
+        totalTimeStart = time.time()
+
+        #FIXME define this
+
         solutionLength = 45
         nodesExpanded = 1032
         heuristicTime = 0
-        totalTimeStart = time.time()
 
-        for i in range(0,100):
-            heuristicTime += 1
+        for i in range(0, 100):
+            heuristicTime += heuristicFn(self)
 
         totalTimeEnd = time.time()
 
         return (solutionLength, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart)
 
+    def performDFSearch(self, NMAX, heuristicFn):
+        #print "performing Depth"
+        # FIXME define this
+        return (0,0,0,0)
 
+    def performAStarSearch(self, NMAX, heuristicFn):
+        #print "performing AStar"
+        # FIXME define this
+        return (0,0,0,0)
 
+    def performBeamSearch(self, NMAX, heuristicFn):
+        #print "performing Beam"
+        # FIXME define this
+        return (0,0,0,0)
