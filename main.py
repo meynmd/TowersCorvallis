@@ -17,7 +17,13 @@ Modes = Enum    ([  "TIMING",       # this is the main mode, timing a bunch of f
                     # these are all unit tests
                     "TEST_ADD_REMOVE",
                     "TEST_FILE_LOAD",
-                    "TEST_EXPAND_STATE"
+                    "TEST_EXPAND_STATE",
+                    "TEST_BFS",
+                    "TEST_DFS",
+                    "TEST_A_STAR",
+                    "TEST_BEAM",
+
+                    "TEST_ALL"
                 ])
 
 SearchFns = Enum   ([           'BFS',
@@ -43,7 +49,7 @@ heuristicFnDict = {
 class Settings(object):
     def __init__(self):
         self.VERBOSE = True
-        self.MODE = Modes.TIMING
+        self.MODE = Modes.TEST_ALL
         self.FILENAME = "perms-9.txt"
         self.NMAX = 10000
         self.beamWidths = [5]  # , 10, 15, 20, 25, 50, 100] #FIXME handle infinity uniformly somehow?
@@ -83,22 +89,8 @@ Pseudocode provided for main timing loop:
           For at least 4 different sizes (number of disks)
              For each of the 20 problems p, Solve p using h or until NMAX nodes are expanded.
                 Record the solution length if successful, the number of nodes expanded, and the total CPU time spent on evaluating the heuristic and on solving the whole problem.
-
-main script
 '''
-settings = Settings()
-if not parseArgs(settings):
-    Usage
-    quit()
-
-elif settings.MODE == Modes.TEST_ADD_REMOVE:
-    towerUnitTests.testAddRemove(settings)
-elif settings.MODE == Modes.TEST_FILE_LOAD:
-    towerUnitTests.testFileLoad(settings)
-elif settings.MODE == Modes.TEST_EXPAND_STATE:
-    towerUnitTests.testExpandState(settings)
-
-elif settings.MODE == Modes.TIMING:
+def computeTiming(settings):
     print "\n***** Testing Timing"
     for sf in settings.searchFns:
         searchFnToCall = searchFnDict[sf]
@@ -106,7 +98,7 @@ elif settings.MODE == Modes.TIMING:
             for hf in settings.heuristicFns:
                 heuristicFnToCall = heuristicFnDict[hf]
                 for ps in settings.problemSizes:
-                    problemSet = loadProblemsFromFile("perms-"+ str(ps) + ".txt")
+                    problemSet = loadProblemsFromFile("perms-" + str(ps) + ".txt")
                     print "\nSearch Function :\t" + str(sf)
                     print "Beam Width :\t" + str(bw)
                     print "Heuristic Function :\t" + str(hf)
@@ -116,3 +108,44 @@ elif settings.MODE == Modes.TIMING:
                         data = searchFnToCall(problem, settings.NMAX, heuristicFnToCall)
                         print str(data[0]) + "\t" + str(data[1]) + "\t" + str(data[2]) + "\t" + str(data[3]) + "\t"
 
+
+'''
+main script
+'''
+settings = Settings()
+if not parseArgs(settings):
+    Usage
+    quit()
+
+# Main mode here, computing timing information
+elif settings.MODE == Modes.TIMING:
+    computeTiming(settings)
+
+# Unit tests for basic operations
+elif settings.MODE == Modes.TEST_ADD_REMOVE:
+    towerUnitTests.testAddRemove(settings)
+elif settings.MODE == Modes.TEST_FILE_LOAD:
+    towerUnitTests.testFileLoad(settings)
+elif settings.MODE == Modes.TEST_EXPAND_STATE:
+    towerUnitTests.testExpandState(settings)
+
+# Unit tests for search Operations
+elif settings.MODE == Modes.TEST_BFS:
+    towerUnitTests.testBFS(settings)
+elif settings.MODE == Modes.TEST_DFS:
+    towerUnitTests.testDFS(settings)
+elif settings.MODE == Modes.TEST_A_STAR:
+    towerUnitTests.testAStarSearch(settings)
+elif settings.MODE == Modes.TEST_BEAM:
+    towerUnitTests.testBeamSearch(settings)
+
+
+
+elif settings.MODE == Modes.TEST_ALL:
+    towerUnitTests.testAddRemove(settings)
+    towerUnitTests.testFileLoad(settings)
+    towerUnitTests.testExpandState(settings)
+    towerUnitTests.testBFS(settings)
+    towerUnitTests.testDFS(settings)
+    towerUnitTests.testAStarSearch(settings)
+    towerUnitTests.testBeamSearch(settings)

@@ -1,6 +1,5 @@
 import sys
 import math
-import main
 from random import randint, seed
 from towerState import TowerState, loadProblemsFromFile
 
@@ -15,7 +14,7 @@ def testAddRemove(settings):
         tower.addDisc(randint(0,2),randint(0,100))
         tower.consolePrint()
 
-    print '\n\n'
+    print 
     tower.removeDisc(0)
     tower.consolePrint()
 
@@ -62,3 +61,27 @@ def testExpandState(settings):
     expanded = tower.expandState()
     for i in expanded:
         i.consolePrint()
+
+def testBFS(settings):
+    print "\n***** Testing BFS"
+
+    #FIXME write this test
+    return
+
+def testDFS(settings):
+    print "\n***** Testing DFS"
+
+    # FIXME write this test
+    return
+
+def testAStarSearch(settings):
+    print "\n***** Testing A* Search"
+
+    # FIXME write this test
+    return
+
+def testBeamSearch(settings):
+    print "\n***** Testing Beam Search"
+
+    # FIXME write this test
+    return
