@@ -14,7 +14,7 @@ def testAddRemove(settings):
         tower.addDisc(randint(0,2),randint(0,100))
         tower.consolePrint()
 
-    print 
+    print
     tower.removeDisc(0)
     tower.consolePrint()
 

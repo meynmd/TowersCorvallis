@@ -48,7 +48,7 @@ heuristicFnDict = {
 
 class Settings(object):
     def __init__(self):
-        self.VERBOSE = True
+        self.VERBOSE = False
         self.MODE = Modes.TEST_ALL
         self.FILENAME = "perms-9.txt"
         self.NMAX = 10000
@@ -58,12 +58,36 @@ class Settings(object):
         self.problemSizes = [4]  # , 5, 6, 7]
 
 
-def Usage(settings):
-    #FIXME implement this once our usage is known
-    print '\n*** Usage:\nusage to be determined\n'
+def Usage():
+    print '\n*** Usage:\n\t\tmain [-f FILENAME] [-a] [-t] [-v] [-n NMAX]\n'
+    print '\t [-f filename] - Sets the file containing problems to FILENAME'
+    print '\t [-a] - Mode selection - Runs all unit tests, but not timing'
+    print '\t [-t] - Mode selection - Runs timing test'
+    print '\t [-v] - Sets output to verbose'
+    print '\t [-n NMAX] - Sets the the number of iterations before search is considered failed to NMAX'
 
 def parseArgs(settings):
-    #FIXME implement this once all our settings are known
+    argc = len(sys.argv) - 1
+    for i in range(1,argc):
+        token = sys.argv[i]
+        if token == '-f':
+            if i + 1 <= argc:
+                print "setting filename"
+                settings.FILENAME = sys.argv[i+1]
+                i += 1
+            else:
+                print "Insufficient arguments, expected Filename after -f"
+                return False
+        elif token == '-a':
+            settings.MODE = Modes.TEST_ALL
+        elif token == '-t':
+            settings.MODE = Modes.TIMING
+        #FIXME more mode setting commands?
+        elif token == '-v':
+            settings.VERBOSE = True
+        else:
+            print "Unknown token : " + token
+            return False
 
     print "***** Running the Towers of Corvallis with the following settings"
     print "***** VERBOSE = \t", settings.VERBOSE
@@ -77,9 +101,6 @@ def parseArgs(settings):
 
     print ""
     return True
-
-
-
 
 '''
 Pseudocode provided for main timing loop:
@@ -114,7 +135,7 @@ main script
 '''
 settings = Settings()
 if not parseArgs(settings):
-    Usage
+    Usage()
     quit()
 
 # Main mode here, computing timing information
