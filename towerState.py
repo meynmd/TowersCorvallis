@@ -2,6 +2,8 @@
 
 import copy
 import time
+import numpy
+from collections import deque
 
 def loadProblemsFromFile(filename):
     problems = []
@@ -31,6 +33,7 @@ class TowerState(object):
         return t
 
     def __init__(self):
+        self.solutionDepth = 0
         self.pegs = []
         for i in range(0, PEG_COUNT):
             self.pegs = self.pegs + [[]]
@@ -45,6 +48,16 @@ class TowerState(object):
         toReturn = self.pegs[pegIdx][-1]
         self.pegs[pegIdx] = self.pegs[pegIdx][0:-1]
         return toReturn
+
+    def goalRecognized(self):
+        for i in range(1, PEG_COUNT):
+            if self.pegs[i]:
+                return False
+        firstPeg = self.pegs[0]
+        for i in range(1, len(firstPeg)):
+            if firstPeg[i] > firstPeg[i-1]:
+                return False
+        return True
 
     def consolePrint(self):
         if self.pegs:
@@ -87,21 +100,44 @@ class TowerState(object):
     # this function as defined makes no sense, but it shows the expected order of
     # arguments in the tuple returned by the actual searchers
     def performBFSearch(self, NMAX, heuristicFn):
-        #print "performing Breadth"
+        print "performing Breadth"
         totalTimeStart = time.time()
 
         #FIXME define this
-
-        solutionLength = 45
-        nodesExpanded = 1032
+        goalDepth = 0
+        nodesExpanded = 0
         heuristicTime = 0
 
-        for i in range(0, 100):
-            heuristicTime += heuristicFn(self)
+
+        searchFrontier = deque()
+        searchFrontier.append(self)
+
+        while len(searchFrontier):
+            print "currently " + str(len(searchFrontier)) + " items in the frontier"
+            print searchFrontier
+            currentState = searchFrontier.popleft()
+            print type(currentState)
+            print type(searchFrontier)
+            print currentState
+            currentState.consolePrint()
+            print "Current solution depth " + str(currentState.solutionDepth)
+            if currentState.goalRecognized():
+                goalDepth = currentState.solutionDepth
+                print "goal found"
+                break;
+            childStates = currentState.expandState()
+            nodesExpanded += 1
+
+            for cs in childStates:
+                cs.solutionDepth += 1
+
+            #FIXME Filter the states in some way? if we only store frontier how can we filter all that we need...
+
+            searchFrontier.append(childStates)
 
         totalTimeEnd = time.time()
 
-        return (solutionLength, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart)
+        return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart)
 
     def performDFSearch(self, NMAX, heuristicFn):
         #print "performing Depth"

@@ -14,7 +14,7 @@ def testAddRemove(settings):
         tower.addDisc(randint(0,2),randint(0,100))
         tower.consolePrint()
 
-    print
+    print '\n'
     tower.removeDisc(0)
     tower.consolePrint()
 
@@ -64,6 +64,9 @@ def testExpandState(settings):
 
 def testBFS(settings):
     print "\n***** Testing BFS"
+    problemSet = loadProblemsFromFile(settings.FILENAME)
+
+    problemSet[2].performBFSearch(settings.NMAX, settings.heuristicFns[0])
 
     #FIXME write this test
     return
