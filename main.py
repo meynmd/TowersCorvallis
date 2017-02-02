@@ -3,10 +3,11 @@ import sys
 import math
 from random import randint, seed
 from towerState import TowerState
-import towerUnitTests
+import unitTests
 from searcher import performBFSearch, performDFSearch, performAStarSearch, performBeamSearch
-from heuristicFns import evaluateAdmissible, evaluateInadmissible
+import searchState
 
+sys.setrecursionlimit(10000)
 
 class Enum(set):
     def __getattr__(self, name):
@@ -21,6 +22,7 @@ Modes = Enum([
     # these are all unit tests
     "TEST_ADD_REMOVE",
     "TEST_EXPAND_STATE",
+    "TEST_HEURISTIC",
     "TEST_BFS",
     "TEST_DFS",
     "TEST_A_STAR",
@@ -42,24 +44,42 @@ searchFnDict = {
     'BEAM': performBeamSearch,
 }
 
-HeuristicFns = Enum ([          'ADMISSIBLE',
-                                'INADMISSIBLE'
+HeuristicFns = Enum ([          'NUM_DISCS_OUT_OF_PLACE',
+                                'NUM_DISCS_OUT_OF_PLACE_ALL_PEG',
+                                'MANHATTAN_DISTANCE',
+                                'MANHATTAN_DISTANCE_ALL_PEG'
+                                'WEIGHTED_NUM_DISCS_OUT_OF_PLACE',
+                                'WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG',
+                                'WEIGHTED_MANHATTAN_DISTANCE',
+                                'WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG'
                     ])
 heuristicFnDict = {
-    'ADMISSIBLE': evaluateAdmissible,
-    'INADMISSIBLE': evaluateInadmissible,
+    'NUM_DISCS_OUT_OF_PLACE'                    : searchState.numDiscsOutOfPlace,
+    'NUM_DISCS_OUT_OF_PLACE_ALL_PEG'           : searchState.numDiscsOutOfPlaceAllPeg,
+    'MANHATTAN_DISTANCE'                        : searchState.manhattanDistance,
+    'MANHATTAN_DISTANCE_ALL_PEG'               : searchState.manhattanDistanceAllPeg,
+    'WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG'  : searchState.weightedNumDiscsOutOfPlaceAllPeg,
+    'WEIGHTED_NUM_DISCS_OUT_OF_PLACE'           : searchState.weightedNumDiscsOutOfPlace,
+    'WEIGHTED_MANHATTAN_DISTANCE'               : searchState.weightedManhattanDistance,
+    'WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG'      : searchState.weightedManhattanDistanceAllPeg
 }
 
 class Settings(object):
     def __init__(self):
-        self.VERBOSE = False
-        self.MODE = Modes.TEST_A_STAR
-        self.FILENAME = "perms-3.txt"
-        self.NMAX = 100
+        self.VERBOSE = True
+        self.MODE = Modes.TIMING
+        self.FILENAME = "perms-4.txt"
+        self.NMAX = 100000
         self.beamWidths = [5]  # , 10, 15, 20, 25, 50, 100] #FIXME handle infinity uniformly somehow?
-        self.searchFns = [SearchFns.BFS, SearchFns.DFS, SearchFns.A_STAR, SearchFns.BEAM]
-        self.heuristicFns = [HeuristicFns.ADMISSIBLE, HeuristicFns.INADMISSIBLE]
-        self.problemSizes = [4]  # , 5, 6, 7]
+        self.searchFns = [SearchFns.A_STAR]
+        self.heuristicFns = [HeuristicFns.MANHATTAN_DISTANCE,
+                             HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE,
+                             #HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG,
+                             #HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG,
+                             #HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
+
+                              ]
+        self.problemSizes = [3]  # , 5, 6, 7]
 
 
 def Usage():
@@ -106,6 +126,15 @@ def parseArgs(settings):
     print ""
     return True
 
+
+def loadProblemsFromFile(filename):
+    problems = []
+    lines = [line.rstrip('\n') for line in open(filename)]
+
+    for line in lines[1:]: # use slicing to chop off the first line, since it is header
+        problems = problems + [TowerState.createTowerFromLine(line)]
+    return problems
+
 '''
 Pseudocode provided for main timing loop:
 
@@ -128,9 +157,9 @@ def computeTiming(settings):
                     print "Beam Width :\t" + str(bw)
                     print "Heuristic Function :\t" + str(hf)
                     print "Problem Size :\t" + str(ps)
-                    print "Solution Length \t Nodes Expanded \t Heuristic Eval Time \t Total Time \t Heuristic"
+                    print "Solution Length \t Nodes Expanded \t Heuristic Eval Time \t Total Time"
                     for problem in problemSet:
-                        data = searchFnToCall(problem, settings.NMAX, heuristicFnToCall)
+                        data = searchFnToCall(problem, settings, heuristicFnToCall)
                         print str(data[0]) + "\t" + str(data[1]) + "\t" + str(data[2]) + "\t" + str(data[3]) + "\t"
 
 
@@ -148,26 +177,35 @@ elif settings.MODE == Modes.TIMING:
 
 # Unit tests for basic operations
 elif settings.MODE == Modes.TEST_ADD_REMOVE:
-    towerUnitTests.testAddRemove(settings)
+    unitTests.testAddRemove(settings)
 elif settings.MODE == Modes.TEST_EXPAND_STATE:
-    towerUnitTests.testExpandState(settings)
+    unitTests.testExpandState(settings)
+
+# if we reached here we will need to load a problem to test with and a heuristic function
+problemSet = loadProblemsFromFile(settings.FILENAME)
+theProblem = problemSet[0]
+theHeuristic = heuristicFnDict[settings.heuristicFns[0]]
+
+if settings.MODE == Modes.TEST_HEURISTIC:
+    unitTests.testHeuristic(settings, problemSet, theHeuristic)
 
 # Unit tests for search Operations
 elif settings.MODE == Modes.TEST_BFS:
-    performBFSearch(settings)
+    performBFSearch(theProblem, settings, theHeuristic)
 elif settings.MODE == Modes.TEST_DFS:
-    performDFSearch(settings)
+    performDFSearch(theProblem, settings, theHeuristic)
 elif settings.MODE == Modes.TEST_A_STAR:
-    performAStarSearch(settings)
+    performAStarSearch(theProblem, settings, theHeuristic)
 elif settings.MODE == Modes.TEST_BEAM:
-    performBeamSearch(settings)
-
-
+    performBeamSearch(theProblem, settings, theHeuristic)
 
 elif settings.MODE == Modes.TEST_ALL:
-    towerUnitTests.testAddRemove(settings)
-    towerUnitTests.testExpandState(settings)
-    performBFSearch(settings)
-    performDFSearch(settings)
-    performAStarSearch(settings)
-    performBeamSearch(settings)
+    unitTests.testAddRemove(settings)
+    unitTests.testExpandState(settings)
+
+    performBFSearch(theProblem, settings, theHeuristic)
+    performDFSearch(theProblem ,settings, theHeuristic)
+    performAStarSearch(theProblem, settings, theHeuristic)
+    performBeamSearch(theProblem, settings, theHeuristic)
+
+    computeTiming(settings)

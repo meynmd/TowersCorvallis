@@ -3,14 +3,17 @@ import copy
 
 class TowerState(object):
     def __init__(self):
-        self.solutionDepth = 0
-        self.predecessor = None
-        self.heuristicEstimate = -1
         self.pegs = []
         self.maxDiscSize = -1
         self.pegCount = 3 # This should be built so that we can change this parameter easily, analog is adding swap space
         for i in range(0, self.pegCount):
             self.pegs = self.pegs + [[]]
+
+    def __str__(self):
+        return str(self.pegs)
+
+    def __repr__(self):
+        return str(self)
 
     @staticmethod
     def createTowerFromLine(line):
@@ -52,11 +55,7 @@ class TowerState(object):
                 return False
         return True
 
-    def consolePrint(self):
-        if self.pegs:
-            print self.pegs,
-            print "solution Depth: " + str(self.solutionDepth),
-            print " heuristic : " + str(self.heuristicEstimate)
+
 
     def sameState(self, otherState):
         if self.pegCount != otherState.pegCount:

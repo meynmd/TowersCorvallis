@@ -3,33 +3,23 @@ import sys
 import math
 from random import randint, seed
 from towerState import TowerState
+from searchState import SearchState
 
 def testAddRemove(settings):
-    seed(567)
     print "\n***** Testing Add and Remove"
+    tower = TowerState(); print tower
 
-    tower = TowerState()
-    tower.consolePrint()
-
+    seed(567)
     for i in range(0,10):
         tower.addDisc(randint(0,2),randint(0,100))
-        tower.consolePrint()
+        print tower
 
     print '\n'
-    tower.removeDisc(0)
-    tower.consolePrint()
-
-    tower.removeDisc(2)
-    tower.consolePrint()
-
-    tower.removeDisc(1)
-    tower.consolePrint()
-
-    tower.removeDisc(2)
-    tower.consolePrint()
-
-    tower.removeDisc(0)
-    tower.consolePrint()
+    tower.removeDisc(0); print tower
+    tower.removeDisc(2); print tower
+    tower.removeDisc(1); print tower
+    tower.removeDisc(2); print tower
+    tower.removeDisc(0); print tower
 
 def testExpandState(settings):
     print "\n***** Testing State Expansion, Initial State"
@@ -37,21 +27,28 @@ def testExpandState(settings):
     tower = TowerState()
     for i in range(0,10):
         tower.addDisc(randint(0,2),randint(0,100))
-    tower.consolePrint()
+    print tower
 
     print "After expansion"
     expanded =  tower.expandState()
-    for i in expanded:
-        i.consolePrint()
+    for child in expanded:
+        print child
 
     print "\nnext initial state"
     tower = TowerState()
     for i in range(0, 2):
         tower.addDisc(randint(0, 2), randint(0, 100))
-    tower.consolePrint()
+    print tower
 
     print "After expansion"
     expanded = tower.expandState()
-    for i in expanded:
-        i.consolePrint()
+    for child in expanded:
+        print child
 
+def testHeuristic(settings, problemSet, theHeuristic):
+    print "\n***** Testing a Heuristic"
+
+    for problem in problemSet:
+        ss = SearchState(problem)
+        theHeuristic(ss)
+        print ss
