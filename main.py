@@ -53,13 +53,9 @@ HeuristicFns = Enum ([          'NUM_DISCS_OUT_OF_PLACE',
                                 'WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG'
                     ])
 heuristicFnDict = {
-    'NUM_DISCS_OUT_OF_PLACE'                    : searchState.numDiscsOutOfPlace,
     'NUM_DISCS_OUT_OF_PLACE_ALL_PEG'            : searchState.numDiscsOutOfPlaceAllPeg,
-    'MANHATTAN_DISTANCE'                        : searchState.manhattanDistance,
     'MANHATTAN_DISTANCE_ALL_PEG'                : searchState.manhattanDistanceAllPeg,
     'WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG'   : searchState.weightedNumDiscsOutOfPlaceAllPeg,
-    'WEIGHTED_NUM_DISCS_OUT_OF_PLACE'           : searchState.weightedNumDiscsOutOfPlace,
-    'WEIGHTED_MANHATTAN_DISTANCE'               : searchState.weightedManhattanDistance,
     'WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG'       : searchState.weightedManhattanDistanceAllPeg
 }
 
@@ -68,18 +64,16 @@ class Settings(object):
         self.VERBOSE = True
         self.PRINT_RESULTS = True
         self.MODE = Modes.TIMING
-        self.FILENAME = "perms-4.txt"
+        self.FILENAME = "perms-10.txt"
         self.NMAX = 5000
-        self.beamWidths = [5, 10, 15, 20, 25, 50, 100]
-        self.searchFns = [SearchFns.BEAM, SearchFns.A_STAR, ]
-        self.heuristicFns = [#HeuristicFns.MANHATTAN_DISTANCE,
-                             #HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE,
-                             HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG,
-                             HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG,
-                             #HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
-
-                              ]
-        self.problemSizes = [3, 4, 5, 6, 7]
+        self.beamWidth = 5
+        self.searchFn = SearchFns.BEAM
+        self.heuristicFn =  HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG
+                            # HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG
+                            # HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG
+                            # HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG
+                            # HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG
+        self.problemSize = 3
 
 
 def Usage():
@@ -106,7 +100,6 @@ def parseArgs(settings):
             settings.MODE = Modes.TEST_ALL
         elif token == '-t':
             settings.MODE = Modes.TIMING
-        #FIXME more mode setting commands?
         elif token == '-v':
             settings.VERBOSE = True
         else:
@@ -118,10 +111,10 @@ def parseArgs(settings):
     print "***** MODE = \t\t", settings.MODE
     print "***** FILENAME = \t" + settings.FILENAME
     print "***** NMAX = \t" + str(settings.NMAX)
-    print "***** BEAM WIDTHS = " + str(settings.beamWidths)
-    print "***** SEARCH FNS = " + str(settings.searchFns)
-    print "***** HEURISTIC FNS = " + str(settings.heuristicFns)
-    print "***** PROBLEM Sizes = " + str(settings.problemSizes)
+    print "***** BEAM WIDTH = " + str(settings.beamWidth)
+    print "***** SEARCH FN = " + str(settings.searchFn)
+    print "***** HEURISTIC FN = " + str(settings.heuristicFn)
+    print "***** PROBLEM Size = " + str(settings.problemSize)
 
     print ""
     return True
@@ -148,19 +141,27 @@ def computeTiming(settings):
     print "\n***** Testing Timing, overriding certain flags"
     settings.PRINT_RESULTS = False
     settings.VERBOSE = False
+    searchFns = [SearchFns.BEAM, SearchFns.A_STAR]
+    beamWidths = [5, 10, 15, 20, 25, 50, 100]
+    heuristicFns = [    HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
+                        HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
+                        HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG,
+                        HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG,
+                    ]
+    problemSizes = [3,4,5,6,7] #FIXME 8,9,10
     print "Search Function \t Beam Width \t Heuristic \t Problem Size\tAvg Solution Depth \t Avg Nodes Expanded \t Avg Heuristic Eval Time \t Avg Total Time\tMax Solution Depth \t Max Nodes Expanded \t Max Heuristic Eval Time \t Max Total Time\tMin Solution Depth \t Min Nodes Expanded \t Min Heuristic Eval Time \t Min Total Time"
 
-    for sf in settings.searchFns:
+    for sf in searchFns:
         searchFnToCall = searchFnDict[sf]
-        for bw in settings.beamWidths:
-            for hf in settings.heuristicFns:
+        for bw in beamWidths:
+            for hf in heuristicFns:
                 heuristicFnToCall = heuristicFnDict[hf]
-                for ps in settings.problemSizes:
+                for ps in problemSizes:
                     data = []
                     problemSet = loadProblemsFromFile("perms-" + str(ps) + ".txt")
 
                     for problem in problemSet:
-                        data += [searchFnToCall(problem, settings, heuristicFnToCall)]
+                        data += [searchFnToCall(problem, settings, heuristicFnToCall, bw)]
                         #print "\t" + str(data[-1][0]) + "\t" + str(data[-1][1]) + "\t" + str(data[-1][2]) + "\t" + str(data[-1][3]) + "\t"
 
                     solnLengthList, nodesExpandedList, heuristicTimesList, totalTimesList = [list(tup) for tup in zip(*data)]
@@ -195,27 +196,25 @@ elif settings.MODE == Modes.TEST_EXPAND_STATE:
 # if we reached here we will need to load a problem to test with and a heuristic function
 problemSet = loadProblemsFromFile(settings.FILENAME)
 theProblem = problemSet[0]
-theHeuristic = heuristicFnDict[settings.heuristicFns[0]]
-
-result = None
+theHeuristic = heuristicFnDict[settings.heuristicFn]
 
 if settings.MODE == Modes.TEST_HEURISTIC:
     unitTests.testHeuristic(settings, problemSet, theHeuristic)
 
 # Unit tests for search Operations
 elif settings.MODE == Modes.TEST_BFS:
-    result = performBFSearch(theProblem, settings, theHeuristic)
+    performBFSearch(theProblem, settings, theHeuristic, settings.beamWidth)
 elif settings.MODE == Modes.TEST_A_STAR:
-    result = performAStarSearch(theProblem, settings, theHeuristic)
+    performAStarSearch(theProblem, settings, theHeuristic, settings.beamWidth)
 elif settings.MODE == Modes.TEST_BEAM:
-    result = performBeamSearch(theProblem, settings, theHeuristic)
+    performBeamSearch(theProblem, settings, theHeuristic, settings.beamWidth)
 
 if settings.MODE == Modes.TEST_ALL:
     #unitTests.testAddRemove(settings)
     #unitTests.testExpandState(settings)
 
-    result = performAStarSearch(theProblem, settings, theHeuristic)
-    result = performBeamSearch(theProblem, settings, theHeuristic)
-    result = performBFSearch(theProblem, settings, theHeuristic)
+    performAStarSearch(theProblem, settings, theHeuristic, settings.beamWidth)
+    performBeamSearch(theProblem, settings, theHeuristic, settings.beamWidth)
+    performBFSearch(theProblem, settings, theHeuristic, settings.beamWidth)
 
     computeTiming(settings)

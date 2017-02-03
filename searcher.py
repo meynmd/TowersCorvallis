@@ -6,7 +6,7 @@ import searchState
 from searchState import SearchState
 
 
-def performBFSearch(initialState, settings, heuristicFn):
+def performBFSearch(initialState, settings, heuristicFn, unusedArg):
     if settings.VERBOSE: print "performing regular Breadth-First Search"
     totalTimeStart = time.time()
 
@@ -85,7 +85,7 @@ def performBFSearch(initialState, settings, heuristicFn):
 
     return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart)
 
-def performAStarSearch(initialState, settings, heuristicFn):
+def performAStarSearch(initialState, settings, heuristicFn, unusedArg):
     if settings.VERBOSE: print "performing AStar"
     totalTimeStart = time.time()
 
@@ -180,12 +180,8 @@ def performAStarSearch(initialState, settings, heuristicFn):
     return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart)
 
 
-def performBeamSearch(initialState, settings, heuristicFn):
+def performBeamSearch(initialState, settings, heuristicFn, beamWidth):
     if settings.VERBOSE: print "performing Beam"
-
-    #FIXME do this better
-    beamWidth = settings.beamWidths[0]
-
     totalTimeStart = time.time()
 
     goalDepth = 0
