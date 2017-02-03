@@ -10,14 +10,15 @@ def performBFSearch(initialState, settings, heuristicFn):
     if settings.VERBOSE: print "performing regular Breadth-First Search"
     totalTimeStart = time.time()
 
-    # FIXME define a measurement struct?
     goalDepth = 0
     nodesExpanded = 0
     heuristicTime = 0
 
     searchFrontier = deque()
+    exploredStates = deque()
     initialSearchState = SearchState(initialState)
     searchFrontier.append(initialSearchState)
+    exploredStates.append(initialSearchState)
 
     loopCounter = 0;
     while len(searchFrontier):
@@ -42,6 +43,7 @@ def performBFSearch(initialState, settings, heuristicFn):
         for cs in childStates:
             childSearchStates.append(SearchState(cs, currentState))
 
+        '''
         if settings.VERBOSE:
             print "\n\n************** loop iter"
             print "currently " + str(len(searchFrontier)) + " items in the frontier"
@@ -52,62 +54,53 @@ def performBFSearch(initialState, settings, heuristicFn):
 
             for cs in childSearchStates:
                 print cs
+        '''
 
         # Filter and add the states
         for cs in childSearchStates:
             duplicateFound = False
-            for os in searchFrontier:
+            for os in exploredStates:
                 if cs.tower.sameState(os.tower):
-                    if settings.VERBOSE:  print "Duplicate found", cs
                     os.solutionDepth = min(os.solutionDepth, cs.solutionDepth)
                     duplicateFound = True
                     break
             if not duplicateFound:
                 searchFrontier.append(cs)
-                if settings.VERBOSE:  print "appending ", cs
+                exploredStates.append(cs)
 
         #remember to remove the item we chose (cleverly, the first item in the list)
         searchFrontier.popleft()
 
     totalTimeEnd = time.time()
 
-    if settings.VERBOSE:
+    if settings.PRINT_RESULTS:
         print "Goal Depth ", goalDepth
         print "Nodes expanded ", nodesExpanded
         print "Heuristic time ", heuristicTime
         print "Total Time ", totalTimeEnd - totalTimeStart
 
     while(currentState):
-        if settings.VERBOSE: print currentState
+        if settings.PRINT_RESULTS: print currentState
         currentState = currentState.predecessor
 
     return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart)
-
-
-def performDFSearch(initialState, settings, heuristicFn):
-    if settings.VERBOSE: print "performing Depth"
-
-    # FIXME define this
-    print " DFS SEARCH NOT WRITTEN YET"
-    return (0, 0, 0, 0)
-
 
 def performAStarSearch(initialState, settings, heuristicFn):
     if settings.VERBOSE: print "performing AStar"
     totalTimeStart = time.time()
 
-    # FIXME define a measurement struct?
     goalDepth = 0
     nodesExpanded = 0
     heuristicTime = 0
 
     searchFrontier = deque()
+    exploredStates = deque()
     initialSearchState = SearchState(initialState)
-    heuristicFn(initialSearchState)
+    heuristicTime += heuristicFn(initialSearchState)
     searchFrontier.append(initialSearchState)
+    exploredStates.append(initialSearchState)
 
     goalState = None
-    prevState = None
     loopCounter = 0
     while len(searchFrontier):
         loopCounter += 1
@@ -120,7 +113,7 @@ def performAStarSearch(initialState, settings, heuristicFn):
 
         # Check to see if we are done ( a little different from BFS)
         if loopCounter > settings.NMAX:
-            if settings.VERBOSE: print "iterations expired, goal not found"
+            if settings.VERBOSE: print settings.NMAX, "iterations expired, goal not found"
             break
         if currentState.tower.goalRecognized():
             goalState = currentState
@@ -129,6 +122,7 @@ def performAStarSearch(initialState, settings, heuristicFn):
             for os in searchFrontier:
                 if os.heuristicEstimate < lowestHeuristic:
                     lowestHeuristic = os.heuristicEstimate
+
             # if this test fails, there are still promising options to expand in the frontier
             if lowestHeuristic == goalState.heuristicEstimate:
                 goalDepth = goalState.solutionDepth
@@ -142,9 +136,10 @@ def performAStarSearch(initialState, settings, heuristicFn):
         for cs in childStates:
             childSearchStates.append(SearchState(cs, currentState))
 
+        '''
         if settings.VERBOSE:
-            print "\n\n************** loop iter ", loopCounter
-            print "currently " + str(len(searchFrontier)) + " items in the frontier"
+            print "\n************** loop iter ", loopCounter,
+            print " currently " + str(len(searchFrontier)) + " items in the frontier",
             for state in searchFrontier:
                 print state
             print "Current solution depth " + str(currentState.solutionDepth)
@@ -152,32 +147,26 @@ def performAStarSearch(initialState, settings, heuristicFn):
 
             for cs in childSearchStates:
                 print cs
+        '''
 
         # Filter and add the states
         for cs in childSearchStates:
-            if prevState and cs.tower.sameState(prevState.tower):
-                if settings.VERBOSE:
-                    print "LOOPING Duplicate found", cs
-                continue
             duplicateFound = False
-            for os in searchFrontier:
+            for os in exploredStates:
                 if cs.tower.sameState(os.tower):
-                    if settings.VERBOSE:  print "Duplicate found", cs
                     os.solutionDepth = min(os.solutionDepth, cs.solutionDepth)
                     duplicateFound = True
                     break
             if not duplicateFound:
-                heuristicFn(cs)
+                heuristicTime += heuristicFn(cs)
                 searchFrontier.append(cs)
-                if settings.VERBOSE:  print "appending ", cs
+                exploredStates.append(cs)
 
-        # remove in a more principled fashion
-        prevState = currentState
         searchFrontier.remove(currentState)
 
     totalTimeEnd = time.time()
 
-    if settings.VERBOSE:
+    if settings.PRINT_RESULTS:
         print "*********** Performance Summary"
         print "Goal Depth ", goalDepth
         print "Nodes expanded ", nodesExpanded
@@ -185,7 +174,7 @@ def performAStarSearch(initialState, settings, heuristicFn):
         print "Total Time ", totalTimeEnd - totalTimeStart
 
     while(currentState):
-        if settings.VERBOSE: print currentState
+        if settings.PRINT_RESULTS: print currentState
         currentState = currentState.predecessor
 
     return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart)
@@ -194,6 +183,102 @@ def performAStarSearch(initialState, settings, heuristicFn):
 def performBeamSearch(initialState, settings, heuristicFn):
     if settings.VERBOSE: print "performing Beam"
 
-    # FIXME define this
-    print " BEAM SEARCH NOT WRITTEN YET"
-    return (0, 0, 0, 0)
+    #FIXME do this better
+    beamWidth = settings.beamWidths[0]
+
+    totalTimeStart = time.time()
+
+    goalDepth = 0
+    nodesExpanded = 0
+    heuristicTime = 0
+
+    searchFrontier = []
+    exploredStates = deque()
+    initialSearchState = SearchState(initialState)
+    heuristicTime += heuristicFn(initialSearchState)
+    searchFrontier += [initialSearchState]
+    exploredStates.append(initialSearchState)
+
+    goalState = None
+    loopCounter = 0
+    while len(searchFrontier):
+        loopCounter += 1
+
+        # Choose a state in a principled fashion
+        currentState = searchFrontier[0]
+        for cs in searchFrontier:
+            if currentState.heuristicEstimate > cs.heuristicEstimate:
+                currentState = cs
+
+        # Check to see if we are done ( a little different from BFS)
+        if loopCounter > settings.NMAX:
+            if settings.VERBOSE: print settings.NMAX, "iterations expired, goal not found"
+            break
+        if currentState.tower.goalRecognized():
+            goalState = currentState
+        if goalState:
+            lowestHeuristic = goalState.heuristicEstimate
+            for os in searchFrontier:
+                if os.heuristicEstimate < lowestHeuristic:
+                    lowestHeuristic = os.heuristicEstimate
+
+            # if this test fails, there are still promising options to expand in the frontier
+            if lowestHeuristic == goalState.heuristicEstimate:
+                goalDepth = goalState.solutionDepth
+                if settings.VERBOSE: print "goal found"
+                break;
+
+        # Perform expansion of the current state
+        nodesExpanded += 1
+        childStates = currentState.tower.expandState()
+        childSearchStates = []
+        for cs in childStates:
+            childSearchStates.append(SearchState(cs, currentState))
+
+
+        if settings.VERBOSE:
+            print "\n************** loop iter ", loopCounter,
+            print " currently " + str(len(searchFrontier)) + " items in the frontier",
+            for state in searchFrontier:
+                print state
+            print "Current solution depth " + str(currentState.solutionDepth)
+            print "printing child states before filtering"
+
+            for cs in childSearchStates:
+                print cs
+
+
+        # Filter and add the states
+        for cs in childSearchStates:
+            duplicateFound = False
+            for os in exploredStates:
+                if cs.tower.sameState(os.tower):
+                    os.solutionDepth = min(os.solutionDepth, cs.solutionDepth)
+                    duplicateFound = True
+                    break
+            if not duplicateFound:
+                heuristicTime += heuristicFn(cs)
+                searchFrontier += [cs]
+                exploredStates.append(cs)
+
+        searchFrontier.remove(currentState)
+
+        #prune things that are not within the beam
+        searchFrontier.sort()
+        searchFrontier = searchFrontier[0:beamWidth]
+
+    totalTimeEnd = time.time()
+
+    if settings.PRINT_RESULTS:
+        print "*********** Performance Summary"
+        print "Goal Depth ", goalDepth
+        print "Nodes expanded ", nodesExpanded
+        print "Heuristic time ", heuristicTime
+        print "Total Time ", totalTimeEnd - totalTimeStart
+
+    while(currentState):
+        if settings.PRINT_RESULTS: print currentState
+        currentState = currentState.predecessor
+
+    return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart)
+
