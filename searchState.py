@@ -22,7 +22,7 @@ class SearchState(object):
     def __cmp__(self, other):
         return cmp(self.heuristicEstimate, other.heuristicEstimate)
 
-# HEURISTIC 1 for report purposes
+# HEURISTIC 1a for report purposes
 def numDiscsOutOfPlaceAllPeg(searchState):
     start = time.time()
     cost = 0
@@ -69,7 +69,7 @@ def manhattanDistanceAllPeg(searchState):
     end = time.time()
     return end - start
 
-#HEURISTIC 3 for report purposes
+#HEURISTIC 1b for report purposes
 def weightedNumDiscsOutOfPlaceAllPeg(searchState):
     start = time.time()
     cost = 0
