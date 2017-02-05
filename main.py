@@ -68,7 +68,7 @@ class Settings(object):
         self.NMAX = 2500
         self.beamWidth = 5
         self.searchFn = SearchFns.BEAM
-        self.heuristicFn =  HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG
+        self.heuristicFn =  HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG
                             # HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG
                             # HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG
                             # HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG
