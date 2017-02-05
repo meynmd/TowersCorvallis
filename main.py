@@ -61,19 +61,19 @@ heuristicFnDict = {
 
 class Settings(object):
     def __init__(self):
-        self.VERBOSE = True
+        self.VERBOSE = False
         self.PRINT_RESULTS = True
-        self.MODE = Modes.TIMING
+        self.MODE = Modes.TEST_BEAM
         self.FILENAME = "perms-10.txt"
-        self.NMAX = 5000
+        self.NMAX = 2500
         self.beamWidth = 5
         self.searchFn = SearchFns.BEAM
-        self.heuristicFn =  HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG
+        self.heuristicFn =  HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG
                             # HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG
                             # HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG
                             # HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG
                             # HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG
-        self.problemSize = 3
+        self.problemSize = 10
 
 
 def Usage():
@@ -203,11 +203,17 @@ if settings.MODE == Modes.TEST_HEURISTIC:
 
 # Unit tests for search Operations
 elif settings.MODE == Modes.TEST_BFS:
-    performBFSearch(theProblem, settings, theHeuristic, settings.beamWidth)
+    for i in range(0,10):
+        theProblem = problemSet[i]
+        performBFSearch(theProblem, settings, theHeuristic, settings.beamWidth)
 elif settings.MODE == Modes.TEST_A_STAR:
-    performAStarSearch(theProblem, settings, theHeuristic, settings.beamWidth)
+    for i in range(0,10):
+        theProblem = problemSet[i]
+        performAStarSearch(theProblem, settings, theHeuristic, settings.beamWidth)
 elif settings.MODE == Modes.TEST_BEAM:
-    performBeamSearch(theProblem, settings, theHeuristic, settings.beamWidth)
+    for i in range(0,10):
+        theProblem = problemSet[i] 
+        performBeamSearch(theProblem, settings, theHeuristic, settings.beamWidth)
 
 if settings.MODE == Modes.TEST_ALL:
     #unitTests.testAddRemove(settings)

@@ -45,7 +45,7 @@ def numDiscsOutOfPlaceAllPeg(searchState):
     return end - start
 
 # HEURISTIC 2 for report purposes
-def manhattanDistanceAllPeg(searchState):
+def badManhattanDistanceAllPeg(searchState):
     start = time.time()
     cost = 0
     goalPeg = searchState.tower.pegs[0]
@@ -68,6 +68,68 @@ def manhattanDistanceAllPeg(searchState):
     searchState.heuristicEstimate = cost
     end = time.time()
     return end - start
+
+
+# another try at inadmissible
+def manhattanDistanceAllPeg(searchState):
+    start = time.time()
+    cost = 0
+    goalPeg = searchState.tower.pegs[0]
+    pegSize = len(goalPeg)
+
+    # start at bottom, no cost until we see a disc out of order
+    # compute error between the expected disc and the disc we have, then double it
+    # since each of these discs must be moved twice
+    isInOrder = True
+    for i in range(0, pegSize):
+        expectedDisc = searchState.tower.maxDiscSize - i
+        
+        #cost += 2*abs(goalPeg[i] - expectedDisc)
+
+        isInOrder = isInOrder and (goalPeg[i] == expectedDisc)
+        if not isInOrder:	
+            addedCost = 2 + abs(goalPeg[i] - expectedDisc)
+            #print '\t\tnot in order: cost += ' + str(addedCost)
+	    cost += addedCost
+
+    for thisPeg in searchState.tower.pegs:
+        if not thisPeg == goalPeg:
+            for i in range(0, len(thisPeg)):
+	    	for j in range(i, len(thisPeg)):
+		    dP = thisPeg[i] - thisPeg[j]
+		    if dP > 0:
+		        cost += dP
+                cost += 1
+
+
+
+    #print '*******\nreturning cost ' + str(cost) + '\n****************'
+
+    searchState.heuristicEstimate = cost
+    end = time.time()
+    return end - start
+
+
+	
+
+    # Same process for other posts, but prefer reverse order, so expected disc is just i
+    # here we will add 1 to the cost, since even if the discs are in perfect reverse order
+    # each disc must be moved once to return to goal state
+    for thisPeg in searchState.tower.pegs:
+        if not thisPeg == goalPeg:
+            for i in range(0, len(thisPeg)):
+	        # add difference between value and expected value, plus number of discs 
+		# on top of this disc, plus 1
+                addedCost = abs(thisPeg[i] - i) + len(thisPeg) - (i)  + 1
+                print '\t\tother peg: addedCost = ' + str(addedCost)
+		cost += addedCost
+
+    searchState.heuristicEstimate = cost
+    end = time.time()
+    return end - start
+
+
+
 
 #HEURISTIC 1b for report purposes
 def weightedNumDiscsOutOfPlaceAllPeg(searchState):
