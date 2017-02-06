@@ -142,13 +142,13 @@ def computeTiming(settings):
     settings.PRINT_RESULTS = False
     settings.VERBOSE = False
     searchFns = [SearchFns.BEAM, SearchFns.A_STAR]
-    beamWidths = [20, 25, 50, 100]
+    beamWidths = [5, 10, 15, 20, 25, 50, 100]
     heuristicFns = [    #HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
                         HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG,
                         HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
                         #HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG,
                     ]
-    problemSizes = [10] #FIXME 8,9,10
+    problemSizes = [3,4,5,6,7,8,9,10] #FIXME 8,9,10
     print "Search Function \t Beam Width \t Heuristic \t Problem Size\tFailures\tAvg Solution Depth \t Avg Nodes Expanded \t Avg Heuristic Eval Time \t Avg Total Time\tMax Solution Depth \t Max Nodes Expanded \t Max Heuristic Eval Time \t Max Total Time\tMin Solution Depth \t Min Nodes Expanded \t Min Heuristic Eval Time \t Min Total Time"
 
     for sf in searchFns:
