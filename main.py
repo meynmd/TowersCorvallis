@@ -53,10 +53,10 @@ HeuristicFns = Enum ([          'NUM_DISCS_OUT_OF_PLACE',
                                 'WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG'
                     ])
 heuristicFnDict = {
-    'NUM_DISCS_OUT_OF_PLACE_ALL_PEG'            : searchState.numDiscsOutOfPlaceAllPeg,
+#    'NUM_DISCS_OUT_OF_PLACE_ALL_PEG'            : searchState.numDiscsOutOfPlaceAllPeg,
     'MANHATTAN_DISTANCE_ALL_PEG'                : searchState.manhattanDistanceAllPeg,
     'WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG'   : searchState.weightedNumDiscsOutOfPlaceAllPeg,
-    'WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG'       : searchState.weightedManhattanDistanceAllPeg
+#    'WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG'       : searchState.weightedManhattanDistanceAllPeg
 }
 
 class Settings(object):

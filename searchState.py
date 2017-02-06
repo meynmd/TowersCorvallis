@@ -22,7 +22,71 @@ class SearchState(object):
     def __cmp__(self, other):
         return cmp(self.heuristicEstimate + self.solutionDepth, other.heuristicEstimate + other.solutionDepth)
 
-# HEURISTIC 1a for report purposes
+# This is the inAdmissible heuristic we reported on
+def manhattanDistanceAllPeg(searchState):
+    start = time.clock()
+    cost = 0
+    goalPeg = searchState.tower.pegs[0]
+    pegSize = len(goalPeg)
+
+    # start at bottom, no cost until we see a disc out of order
+    # compute error between the expected disc and the disc we have, then double it
+    # since each of these discs must be moved twice
+    isInOrder = True
+    for i in range(0, pegSize):
+        expectedDisc = searchState.tower.maxDiscSize - i
+
+        # cost += 2*abs(goalPeg[i] - expectedDisc)
+
+        isInOrder = isInOrder and (goalPeg[i] == expectedDisc)
+        if not isInOrder:
+            cost += 2 + abs(goalPeg[i] - expectedDisc)
+            # print '\t\tnot in order: cost += ' + str(addedCost)
+
+    for thisPeg in searchState.tower.pegs:
+        if not thisPeg == goalPeg:
+            for i in range(0, len(thisPeg)):
+                for j in range(i, len(thisPeg)):
+                    dP = thisPeg[i] - thisPeg[j]
+                    if dP > 0:
+                        cost += dP
+                    cost += 1
+
+    # print '*******\nreturning cost ' + str(cost) + '\n****************'
+
+    searchState.heuristicEstimate = cost
+    end = time.clock()
+    return end - start
+
+
+# This is the admissible heuristic we reported on
+def weightedNumDiscsOutOfPlaceAllPeg(searchState):
+    start = time.clock()
+    cost = 0
+    goalPeg = searchState.tower.pegs[0]
+    pegSize = len(goalPeg)
+
+    # count occurences of discs not being in the proper order on the goal post
+    for i in range(0, pegSize):
+        weight = float(pegSize - i ) / float(pegSize)
+        expectedDisc = searchState.tower.maxDiscSize - i
+        cost += weight* 2 * int(bool(abs(goalPeg[i] - expectedDisc)))
+
+    # Same process for other posts, but prefer reverse order, so expected disc is just i
+    # here we will add 1 to the cost, since even if the discs are in perfect reverse order
+    # each disc must be moved once to return to goal state
+    for thisPeg in searchState.tower.pegs:
+        if not thisPeg == goalPeg:
+            thisPegSize = len(thisPeg)
+            for i in range(0, thisPegSize):
+                weight = float(thisPegSize - i + 1) / float(thisPegSize)
+                cost += weight*int(bool(abs(thisPeg[i] - i)))
+
+    searchState.heuristicEstimate = cost
+    end = time.clock()
+    return end - start
+
+'''
 def numDiscsOutOfPlaceAllPeg(searchState):
     start = time.clock()
     cost = 0
@@ -69,45 +133,6 @@ def badManhattanDistanceAllPeg(searchState):
     end = time.clock()
     return end - start
 
-
-# heuristic fn 2a: "augmented" manhattan distance
-def manhattanDistanceAllPeg(searchState):
-    start = time.clock()
-    cost = 0
-    goalPeg = searchState.tower.pegs[0]
-    pegSize = len(goalPeg)
-
-    # start at bottom, no cost until we see a disc out of order
-    # compute error between the expected disc and the disc we have, then double it
-    # since each of these discs must be moved twice
-    isInOrder = True
-    for i in range(0, pegSize):
-        expectedDisc = searchState.tower.maxDiscSize - i
-        
-        #cost += 2*abs(goalPeg[i] - expectedDisc)
-
-        isInOrder = isInOrder and (goalPeg[i] == expectedDisc)
-        if not isInOrder:	
-            addedCost = 2 + abs(goalPeg[i] - expectedDisc)
-            #print '\t\tnot in order: cost += ' + str(addedCost)
-	    cost += addedCost
-
-    for thisPeg in searchState.tower.pegs:
-        if not thisPeg == goalPeg:
-            for i in range(0, len(thisPeg)):
-	    	for j in range(i, len(thisPeg)):
-		    dP = thisPeg[i] - thisPeg[j]
-		    if dP > 0:
-		        cost += dP
-                cost += 1
-
-
-
-    #print '*******\nreturning cost ' + str(cost) + '\n****************'
-
-    searchState.heuristicEstimate = cost
-    end = time.clock()
-    return end - start
 
 
 # heuristic fn 2b: weighted "augmented" manhattan distance
@@ -165,32 +190,6 @@ def weightedManhattanDistanceAllPeg(searchState):
 
 
 
-#HEURISTIC 1b for report purposes
-def weightedNumDiscsOutOfPlaceAllPeg(searchState):
-    start = time.clock()
-    cost = 0
-    goalPeg = searchState.tower.pegs[0]
-    pegSize = len(goalPeg)
-
-    # count occurences of discs not being in the proper order on the goal post
-    for i in range(0, pegSize):
-        weight = float(pegSize - i ) / float(pegSize)
-        expectedDisc = searchState.tower.maxDiscSize - i
-        cost += weight* 2 * int(bool(abs(goalPeg[i] - expectedDisc)))
-
-    # Same process for other posts, but prefer reverse order, so expected disc is just i
-    # here we will add 1 to the cost, since even if the discs are in perfect reverse order
-    # each disc must be moved once to return to goal state
-    for thisPeg in searchState.tower.pegs:
-        if not thisPeg == goalPeg:
-            thisPegSize = len(thisPeg)
-            for i in range(0, thisPegSize):
-                weight = float(thisPegSize - i + 1) / float(thisPegSize)
-                cost += weight*int(bool(abs(thisPeg[i] - i)))
-
-    searchState.heuristicEstimate = cost
-    end = time.clock()
-    return end - start
 
 
 
@@ -221,3 +220,4 @@ def badWeightedManhattanDistanceAllPeg(searchState):
     searchState.heuristicEstimate = cost
     end = time.clock()
     return end - start
+'''
