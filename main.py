@@ -65,7 +65,7 @@ class Settings(object):
         self.PRINT_RESULTS = False
         self.MODE = Modes.TIMING
         self.FILENAME = "perms-3.txt"
-        self.NMAX = 2500
+        self.NMAX = 500
         self.beamWidth = 30
         self.searchFn = SearchFns.A_STAR
         self.heuristicFn =  HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG
@@ -142,13 +142,13 @@ def computeTiming(settings):
     settings.PRINT_RESULTS = False
     settings.VERBOSE = False
     searchFns = [SearchFns.BEAM, SearchFns.A_STAR]
-    beamWidths = [5, 10, 15, 20, 25, 50, 100]
+    beamWidths = [20, 25, 50, 100]
     heuristicFns = [    #HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
                         HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG,
                         HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
                         #HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG,
                     ]
-    problemSizes = [3,4,5,6,7,8,9,10] #FIXME 8,9,10
+    problemSizes = [10] #FIXME 8,9,10
     print "Search Function \t Beam Width \t Heuristic \t Problem Size\tFailures\tAvg Solution Depth \t Avg Nodes Expanded \t Avg Heuristic Eval Time \t Avg Total Time\tMax Solution Depth \t Max Nodes Expanded \t Max Heuristic Eval Time \t Max Total Time\tMin Solution Depth \t Min Nodes Expanded \t Min Heuristic Eval Time \t Min Total Time"
 
     for sf in searchFns:
@@ -171,12 +171,13 @@ def computeTiming(settings):
                             successes += [datum]
                         else:
                             failures += [datum]
-                    solnLengthList, nodesExpandedList, heuristicTimesList, totalTimesList, failuresList = [list(tup) for tup in zip(*successes)]
+                    try:
+                        solnLengthList, nodesExpandedList, heuristicTimesList, totalTimesList, failuresList = [list(tup) for tup in zip(*successes)]
+                    except ValueError:
+                        print str(sf) + "\t" + str(bw) + "\t" + str(hf) + "\t" + str(ps) + "\t" + str(len(failures))
+                        continue
+
                     numProblems = len(problemSet)
-
-
-
-
                     print str(sf) + "\t" + str(bw) + "\t" + str(hf) + "\t" + str(ps) + "\t" + str(len(failures)),
                     print "\t" + str(sum(solnLengthList)/numProblems) + "\t" + str(sum(nodesExpandedList)/numProblems) + "\t" + str(sum(heuristicTimesList)/numProblems) + "\t" + str(sum(totalTimesList)/numProblems),
                     print "\t" + str(max(solnLengthList)) + "\t" + str(max(nodesExpandedList)) + "\t" + str(max(heuristicTimesList)) + "\t" + str(max(totalTimesList)),
