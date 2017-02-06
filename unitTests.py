@@ -49,8 +49,9 @@ def testHeuristic(settings, problemSet, theHeuristic):
     print "\n***** Testing Heuristics"
     seed(61353)
     problemSet = []
+    problemSize = 3
     for i in range(0,10):
-        problemSet += [TowerState.createRandomTower(7)]
+        problemSet += [TowerState.createRandomTower(problemSize)]
 
     for problem in problemSet:
         ss = SearchState(problem)

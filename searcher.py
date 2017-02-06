@@ -8,9 +8,9 @@ from searchState import SearchState
 
 def performBFSearch(initialState, settings, heuristicFn, unusedArg):
     if settings.VERBOSE: print "performing regular Breadth-First Search"
-    totalTimeStart = time.time()
+    totalTimeStart = time.clock()
 
-    goalDepth = 0
+    goalDepth = float('inf')
     nodesExpanded = 0
     heuristicTime = 0
 
@@ -71,9 +71,11 @@ def performBFSearch(initialState, settings, heuristicFn, unusedArg):
         #remember to remove the item we chose (cleverly, the first item in the list)
         searchFrontier.popleft()
 
-    totalTimeEnd = time.time()
+    totalTimeEnd = time.clock()
 
+    searchSucceeded = not goalDepth == float('inf')
     if settings.PRINT_RESULTS:
+        print "*********** Performance Summary: Search", searchSucceeded
         print "Goal Depth ", goalDepth
         print "Nodes expanded ", nodesExpanded
         print "Heuristic time ", heuristicTime
@@ -83,13 +85,13 @@ def performBFSearch(initialState, settings, heuristicFn, unusedArg):
         if settings.PRINT_RESULTS: print currentState
         currentState = currentState.predecessor
 
-    return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart)
+    return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart, searchSucceeded)
 
 def performAStarSearch(initialState, settings, heuristicFn, unusedArg):
     if settings.VERBOSE: print "performing AStar"
-    totalTimeStart = time.time()
+    totalTimeStart = time.clock()
 
-    goalDepth = 0
+    goalDepth = float('inf')
     nodesExpanded = 0
     heuristicTime = 0
 
@@ -108,7 +110,7 @@ def performAStarSearch(initialState, settings, heuristicFn, unusedArg):
         # Choose a state in a principled fashion
         currentState = searchFrontier[0]
         for cs in searchFrontier:
-            if currentState.heuristicEstimate > cs.heuristicEstimate:
+            if currentState.heuristicEstimate + currentState.solutionDepth > cs.heuristicEstimate + cs.solutionDepth:
                 currentState = cs
 
         # Check to see if we are done ( a little different from BFS)
@@ -118,13 +120,13 @@ def performAStarSearch(initialState, settings, heuristicFn, unusedArg):
         if currentState.tower.goalRecognized():
             goalState = currentState
         if goalState:
-            lowestHeuristic = goalState.heuristicEstimate
+            lowestPrediction = goalState.heuristicEstimate + goalState.solutionDepth
             for os in searchFrontier:
-                if os.heuristicEstimate < lowestHeuristic:
-                    lowestHeuristic = os.heuristicEstimate
+                if os.heuristicEstimate + os.solutionDepth < lowestPrediction:
+                    lowestPrediction = os.heuristicEstimate + os.solutionDepth
 
             # if this test fails, there are still promising options to expand in the frontier
-            if lowestHeuristic == goalState.heuristicEstimate:
+            if lowestPrediction == goalState.heuristicEstimate + goalState.solutionDepth:
                 goalDepth = goalState.solutionDepth
                 if settings.VERBOSE: print "goal found"
                 break;
@@ -164,10 +166,11 @@ def performAStarSearch(initialState, settings, heuristicFn, unusedArg):
 
         searchFrontier.remove(currentState)
 
-    totalTimeEnd = time.time()
+    totalTimeEnd = time.clock()
 
+    searchSucceeded = not goalDepth == float('inf')
     if settings.PRINT_RESULTS:
-        print "*********** Performance Summary"
+        print "*********** Performance Summary: Search", searchSucceeded
         print "Goal Depth ", goalDepth
         print "Nodes expanded ", nodesExpanded
         print "Heuristic time ", heuristicTime
@@ -177,14 +180,14 @@ def performAStarSearch(initialState, settings, heuristicFn, unusedArg):
         if settings.PRINT_RESULTS: print currentState
         currentState = currentState.predecessor
 
-    return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart)
+    return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart, searchSucceeded)
 
 
 def performBeamSearch(initialState, settings, heuristicFn, beamWidth):
     if settings.VERBOSE: print "performing Beam"
-    totalTimeStart = time.time()
+    totalTimeStart = time.clock()
 
-    goalDepth = 0
+    goalDepth = float('inf')
     nodesExpanded = 0
     heuristicTime = 0
 
@@ -203,7 +206,7 @@ def performBeamSearch(initialState, settings, heuristicFn, beamWidth):
         # Choose a state in a principled fashion
         currentState = searchFrontier[0]
         for cs in searchFrontier:
-            if currentState.heuristicEstimate > cs.heuristicEstimate:
+            if currentState.heuristicEstimate + currentState.solutionDepth > cs.heuristicEstimate + cs.solutionDepth:
                 currentState = cs
 
         # Check to see if we are done ( a little different from BFS)
@@ -213,13 +216,13 @@ def performBeamSearch(initialState, settings, heuristicFn, beamWidth):
         if currentState.tower.goalRecognized():
             goalState = currentState
         if goalState:
-            lowestHeuristic = goalState.heuristicEstimate
+            lowestPrediction = goalState.heuristicEstimate + goalState.solutionDepth
             for os in searchFrontier:
-                if os.heuristicEstimate < lowestHeuristic:
-                    lowestHeuristic = os.heuristicEstimate
+                if os.heuristicEstimate + os.solutionDepth < lowestPrediction:
+                    lowestPrediction = os.heuristicEstimate + os.solutionDepth
 
             # if this test fails, there are still promising options to expand in the frontier
-            if lowestHeuristic == goalState.heuristicEstimate:
+            if lowestPrediction == goalState.heuristicEstimate + goalState.solutionDepth:
                 goalDepth = goalState.solutionDepth
                 if settings.VERBOSE: print "goal found"
                 break;
@@ -263,10 +266,11 @@ def performBeamSearch(initialState, settings, heuristicFn, beamWidth):
         searchFrontier.sort()
         searchFrontier = searchFrontier[0:beamWidth]
 
-    totalTimeEnd = time.time()
+    totalTimeEnd = time.clock()
 
+    searchSucceeded = not goalDepth == float('inf')
     if settings.PRINT_RESULTS:
-        print "*********** Performance Summary"
+        print "*********** Performance Summary: Search ", searchSucceeded
         print "Goal Depth ", goalDepth
         print "Nodes expanded ", nodesExpanded
         print "Heuristic time ", heuristicTime
@@ -276,5 +280,5 @@ def performBeamSearch(initialState, settings, heuristicFn, beamWidth):
         if settings.PRINT_RESULTS: print currentState
         currentState = currentState.predecessor
 
-    return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart)
+    return (goalDepth, nodesExpanded, heuristicTime, totalTimeEnd - totalTimeStart, searchSucceeded)
 

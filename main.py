@@ -62,10 +62,10 @@ heuristicFnDict = {
 class Settings(object):
     def __init__(self):
         self.VERBOSE = False
-        self.PRINT_RESULTS = True
-        self.MODE = Modes.TEST_HEURISTIC
-        self.FILENAME = "perms-10.txt"
-        self.NMAX = 50000
+        self.PRINT_RESULTS = False
+        self.MODE = Modes.TIMING
+        self.FILENAME = "perms-3.txt"
+        self.NMAX = 2500
         self.beamWidth = 30
         self.searchFn = SearchFns.A_STAR
         self.heuristicFn =  HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG
@@ -144,12 +144,12 @@ def computeTiming(settings):
     searchFns = [SearchFns.BEAM, SearchFns.A_STAR]
     beamWidths = [5, 10, 15, 20, 25, 50, 100]
     heuristicFns = [    #HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
-                        HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
                         HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG,
+                        HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
                         #HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG,
                     ]
     problemSizes = [3,4,5,6,7,8,9,10] #FIXME 8,9,10
-    print "Search Function \t Beam Width \t Heuristic \t Problem Size\tAvg Solution Depth \t Avg Nodes Expanded \t Avg Heuristic Eval Time \t Avg Total Time\tMax Solution Depth \t Max Nodes Expanded \t Max Heuristic Eval Time \t Max Total Time\tMin Solution Depth \t Min Nodes Expanded \t Min Heuristic Eval Time \t Min Total Time"
+    print "Search Function \t Beam Width \t Heuristic \t Problem Size\tFailures\tAvg Solution Depth \t Avg Nodes Expanded \t Avg Heuristic Eval Time \t Avg Total Time\tMax Solution Depth \t Max Nodes Expanded \t Max Heuristic Eval Time \t Max Total Time\tMin Solution Depth \t Min Nodes Expanded \t Min Heuristic Eval Time \t Min Total Time"
 
     for sf in searchFns:
         searchFnToCall = searchFnDict[sf]
@@ -164,10 +164,20 @@ def computeTiming(settings):
                         data += [searchFnToCall(problem, settings, heuristicFnToCall, bw)]
                         #print "\t" + str(data[-1][0]) + "\t" + str(data[-1][1]) + "\t" + str(data[-1][2]) + "\t" + str(data[-1][3]) + "\t"
 
-                    solnLengthList, nodesExpandedList, heuristicTimesList, totalTimesList = [list(tup) for tup in zip(*data)]
+                    failures = []
+                    successes = []
+                    for datum in data:
+                        if(datum[4]):
+                            successes += [datum]
+                        else:
+                            failures += [datum]
+                    solnLengthList, nodesExpandedList, heuristicTimesList, totalTimesList, failuresList = [list(tup) for tup in zip(*successes)]
                     numProblems = len(problemSet)
 
-                    print str(sf) + "\t" + str(bw) + "\t" + str(hf) + "\t" + str(ps),
+
+
+
+                    print str(sf) + "\t" + str(bw) + "\t" + str(hf) + "\t" + str(ps) + "\t" + str(len(failures)),
                     print "\t" + str(sum(solnLengthList)/numProblems) + "\t" + str(sum(nodesExpandedList)/numProblems) + "\t" + str(sum(heuristicTimesList)/numProblems) + "\t" + str(sum(totalTimesList)/numProblems),
                     print "\t" + str(max(solnLengthList)) + "\t" + str(max(nodesExpandedList)) + "\t" + str(max(heuristicTimesList)) + "\t" + str(max(totalTimesList)),
                     print "\t" + str(min(solnLengthList)) + "\t" + str(min(nodesExpandedList)) + "\t" + str(min(heuristicTimesList)) + "\t" + str(min(totalTimesList))
@@ -214,15 +224,15 @@ if settings.MODE == Modes.TEST_HEURISTIC:
 
 # Unit tests for search Operations
 elif settings.MODE == Modes.TEST_BFS:
-    for i in range(0,10):
+    for i in range(0,len(problemSet)):
         theProblem = problemSet[i]
         performBFSearch(theProblem, settings, theHeuristic, settings.beamWidth)
 elif settings.MODE == Modes.TEST_A_STAR:
-    for i in range(0,10):
+    for i in range(0,len(problemSet)):
         theProblem = problemSet[i]
         performAStarSearch(theProblem, settings, theHeuristic, settings.beamWidth)
 elif settings.MODE == Modes.TEST_BEAM:
-    for i in range(0,10):
+    for i in range(0,len(problemSet)):
         theProblem = problemSet[i] 
         performBeamSearch(theProblem, settings, theHeuristic, settings.beamWidth)
 

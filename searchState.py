@@ -20,11 +20,11 @@ class SearchState(object):
         return str(self)
 
     def __cmp__(self, other):
-        return cmp(self.heuristicEstimate, other.heuristicEstimate)
+        return cmp(self.heuristicEstimate + self.solutionDepth, other.heuristicEstimate + other.solutionDepth)
 
 # HEURISTIC 1a for report purposes
 def numDiscsOutOfPlaceAllPeg(searchState):
-    start = time.time()
+    start = time.clock()
     cost = 0
     goalPeg = searchState.tower.pegs[0]
     pegSize = len(goalPeg)
@@ -41,12 +41,12 @@ def numDiscsOutOfPlaceAllPeg(searchState):
             cost += len(thisPeg)
 
     searchState.heuristicEstimate = cost
-    end = time.time()
+    end = time.clock()
     return end - start
 
 # never mind...
 def badManhattanDistanceAllPeg(searchState):
-    start = time.time()
+    start = time.clock()
     cost = 0
     goalPeg = searchState.tower.pegs[0]
     pegSize = len(goalPeg)
@@ -66,13 +66,13 @@ def badManhattanDistanceAllPeg(searchState):
                 cost += abs(thisPeg[i] - i) + 1
 
     searchState.heuristicEstimate = cost
-    end = time.time()
+    end = time.clock()
     return end - start
 
 
 # heuristic fn 2a: "augmented" manhattan distance
 def manhattanDistanceAllPeg(searchState):
-    start = time.time()
+    start = time.clock()
     cost = 0
     goalPeg = searchState.tower.pegs[0]
     pegSize = len(goalPeg)
@@ -106,13 +106,13 @@ def manhattanDistanceAllPeg(searchState):
     #print '*******\nreturning cost ' + str(cost) + '\n****************'
 
     searchState.heuristicEstimate = cost
-    end = time.time()
+    end = time.clock()
     return end - start
 
 
 # heuristic fn 2b: weighted "augmented" manhattan distance
 def weightedManhattanDistanceAllPeg(searchState):
-    start = time.time()
+    start = time.clock()
     cost = 0
     goalPeg = searchState.tower.pegs[0]
     pegSize = len(goalPeg)
@@ -157,7 +157,7 @@ def weightedManhattanDistanceAllPeg(searchState):
     #print '*******\nreturning cost ' + str(cost) + '\n****************'
 
     searchState.heuristicEstimate = cost
-    end = time.time()
+    end = time.clock()
     return end - start
 
 
@@ -167,7 +167,7 @@ def weightedManhattanDistanceAllPeg(searchState):
 
 #HEURISTIC 1b for report purposes
 def weightedNumDiscsOutOfPlaceAllPeg(searchState):
-    start = time.time()
+    start = time.clock()
     cost = 0
     goalPeg = searchState.tower.pegs[0]
     pegSize = len(goalPeg)
@@ -189,14 +189,14 @@ def weightedNumDiscsOutOfPlaceAllPeg(searchState):
                 cost += weight*int(bool(abs(thisPeg[i] - i)))
 
     searchState.heuristicEstimate = cost
-    end = time.time()
+    end = time.clock()
     return end - start
 
 
 
 # never mind...
 def badWeightedManhattanDistanceAllPeg(searchState):
-    start = time.time()
+    start = time.clock()
     cost = 0
     goalPeg = searchState.tower.pegs[0]
     pegSize = len(goalPeg)
@@ -219,5 +219,5 @@ def badWeightedManhattanDistanceAllPeg(searchState):
                 cost += weight*(abs(thisPeg[i] - i) + 1)
 
     searchState.heuristicEstimate = cost
-    end = time.time()
+    end = time.clock()
     return end - start
