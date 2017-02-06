@@ -46,7 +46,11 @@ def testExpandState(settings):
         print child
 
 def testHeuristic(settings, problemSet, theHeuristic):
-    print "\n***** Testing a Heuristic"
+    print "\n***** Testing Heuristics"
+    seed(61353)
+    problemSet = []
+    for i in range(0,10):
+        problemSet += [TowerState.createRandomTower(7)]
 
     for problem in problemSet:
         ss = SearchState(problem)

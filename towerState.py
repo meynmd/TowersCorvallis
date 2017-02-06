@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import copy
+import random
 
 class TowerState(object):
     def __init__(self):
@@ -32,6 +33,17 @@ class TowerState(object):
             if toAdd > t.maxDiscSize:
                 t.maxDiscSize = toAdd
         return t
+
+    @staticmethod
+    def createRandomTower(numDiscs):
+        t = TowerState()
+        discList = [i for i in range(0,numDiscs)]
+        random.shuffle(discList)
+
+        for disc in discList:
+            t.addDisc(random.randint(0,t.pegCount-1), disc)
+        return t
+
 
 
     def addDisc(self, pegIdx, discSize):

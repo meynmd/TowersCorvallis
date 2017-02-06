@@ -63,12 +63,12 @@ class Settings(object):
     def __init__(self):
         self.VERBOSE = False
         self.PRINT_RESULTS = True
-        self.MODE = Modes.TEST_BEAM
+        self.MODE = Modes.TEST_HEURISTIC
         self.FILENAME = "perms-10.txt"
-        self.NMAX = 2500
-        self.beamWidth = 5
-        self.searchFn = SearchFns.BEAM
-        self.heuristicFn =  HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG
+        self.NMAX = 50000
+        self.beamWidth = 30
+        self.searchFn = SearchFns.A_STAR
+        self.heuristicFn =  HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG
                             # HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG
                             # HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG
                             # HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG
@@ -143,12 +143,12 @@ def computeTiming(settings):
     settings.VERBOSE = False
     searchFns = [SearchFns.BEAM, SearchFns.A_STAR]
     beamWidths = [5, 10, 15, 20, 25, 50, 100]
-    heuristicFns = [    HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
+    heuristicFns = [    #HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
                         HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
                         HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG,
-                        HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG,
+                        #HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG,
                     ]
-    problemSizes = [3,4,5,6,7] #FIXME 8,9,10
+    problemSizes = [3,4,5,6,7,8,9,10] #FIXME 8,9,10
     print "Search Function \t Beam Width \t Heuristic \t Problem Size\tAvg Solution Depth \t Avg Nodes Expanded \t Avg Heuristic Eval Time \t Avg Total Time\tMax Solution Depth \t Max Nodes Expanded \t Max Heuristic Eval Time \t Max Total Time\tMin Solution Depth \t Min Nodes Expanded \t Min Heuristic Eval Time \t Min Total Time"
 
     for sf in searchFns:
@@ -196,10 +196,21 @@ elif settings.MODE == Modes.TEST_EXPAND_STATE:
 # if we reached here we will need to load a problem to test with and a heuristic function
 problemSet = loadProblemsFromFile(settings.FILENAME)
 theProblem = problemSet[0]
+
+
 theHeuristic = heuristicFnDict[settings.heuristicFn]
 
 if settings.MODE == Modes.TEST_HEURISTIC:
-    unitTests.testHeuristic(settings, problemSet, theHeuristic)
+    heuristicFns = [  # HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
+        HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG,
+        HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG,
+        # HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG,
+    ]
+    print heuristicFns[0]
+    unitTests.testHeuristic(settings, problemSet, heuristicFnDict[heuristicFns[0]])
+    print
+    print heuristicFns[1]
+    unitTests.testHeuristic(settings, problemSet, heuristicFnDict[heuristicFns[1]])
 
 # Unit tests for search Operations
 elif settings.MODE == Modes.TEST_BFS:
