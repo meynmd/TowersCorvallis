@@ -62,13 +62,13 @@ heuristicFnDict = {
 class Settings(object):
     def __init__(self):
         self.VERBOSE = False
-        self.PRINT_RESULTS = False
-        self.MODE = Modes.TIMING
-        self.FILENAME = "perms-3.txt"
+        self.PRINT_RESULTS = True
+        self.MODE = Modes.TEST_BEAM
+        self.FILENAME = "perms-6.txt"
         self.NMAX = 500
-        self.beamWidth = 30
-        self.searchFn = SearchFns.A_STAR
-        self.heuristicFn =  HeuristicFns.WEIGHTED_NUM_DISCS_OUT_OF_PLACE_ALL_PEG
+        self.beamWidth = 50
+        self.searchFn = SearchFns.BEAM
+        self.heuristicFn =  HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG
                             # HeuristicFns.NUM_DISCS_OUT_OF_PLACE_ALL_PEG
                             # HeuristicFns.MANHATTAN_DISTANCE_ALL_PEG
                             # HeuristicFns.WEIGHTED_MANHATTAN_DISTANCE_ALL_PEG
