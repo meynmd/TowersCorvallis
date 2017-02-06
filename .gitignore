@@ -6,3 +6,11 @@
 *.pyc
 
 pegcount.numbers
+
+report/main.synctex.gz
+
+*.log
+
+*.out
+
+*.aux
