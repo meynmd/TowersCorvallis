@@ -21,22 +21,40 @@
 \maketitle
 \section{Abstract}
 
-Goal based agents use a search algorithm to find a path to the goal state.  The current problem we are trying to solve fits into the search framework (defined goal, deterministic, known environment, atomic representation of states) .   We explore two different heuristic search algorithms and compare their performance for different initial state. In Particular we present the results using informed search algorithms (A*, Beam Search).  Each of these two algorithms are tested with admissible and inadmissible heuristics functions.
+Goal based agents use a search algorithm to find a path to the goal state.  
+The current problem we are trying to solve fits into the search framework (defined goal, deterministic, known environment, atomic representation of states).   
+We explore two different heuristic search algorithms and compare their performance for different initial state. 
+In particular, we present the results using informed search algorithms (A*, Beam Search).
+Each of these two algorithms are tested with admissible and inadmissible heuristics functions.
 
 \section{Introduction}
 
-Informed search strategies can outperform uninformed strategies such as breadth-first search by selecting actions to pursue based on an evaluation function. The evaluation function specifies the expected cost of the best path going through that node. Since it is generally not possible to evaluate the cost of a path in advance, this evaluation function is usually an estimate or heuristic.
+Informed search strategies can outperform uninformed strategies, such as breadth-first search, by selecting actions to pursue based on an evaluation function. 
+The evaluation function specifies the expected cost of the best path going through that node. 
+Since it is generally not possible to evaluate the cost of a path in advance, this evaluation function is usually an estimate or heuristic.
 
-Our goal in this project is to find useful heuristic functions (both admissible and inadmissible) for a variation on the Towers of Hanoi. Our problem, called Towers of Corvallis, is like the original game except that any disc can be placed on any other, regardless of size. In this problem, the goal is always to reach the state in which all discs are on the first of the three pegs, with the lowest-numbered disc at the bottom, the rest of the discs in ascending order up to the largest number at the top.
+Our goal in this project is to find useful heuristic functions (both admissible and inadmissible) for a variation on the Towers of Hanoi.
+Our problem, called Towers of Corvallis, is like the original game except that any disc can be placed on any other, regardless of size.
+In this problem, the goal is always to reach the state in which all discs are on the first of the three pegs, with the lowest-numbered disc at the bottom, the rest of the discs in ascending order up to the largest number at the top.
 
-We use A* and Beam Search with beam widths 5, 10, 15, 20, 25, 50 and 100. Each of these searches is performed with four different heuristic functions, two admissible and two inadmissible.
+We use A* and Beam Search with beam widths 5, 10, 15, 20, 25, 50 and 100. Each of these searches is performed with two different heuristic functions, one admissible and one inadmissible.
 
 
 \section{Algorithms-Heuristic Functions}
 We tested two functions as heuristics: one admissible and one inadmissible.\\
 
 
-\textbf{Heuristic Function 1 }considers the first disc on Peg A that isout of solution order. The function adds the number of discs above to the total cost of this state. This is the minimum possible actual cost of a solution path through this state, because at least one move is needed to move each disc above the ‚Äúbad‚Äù disc to another peg, and at least one more move to move the ‚Äúbad‚Äù disc.  For the other two pegs, the desired order is in reverse so that the discs can be easily placed on Peg A when possible. All discs out of desired order on Pegs B and C are assigned a cost of 1, because at least one move will be necessary to move them to Peg A.
+\textbf{Heuristic Function 1 }considers the first disc on the Goal Peg (Peg A) that is out of solution order. 
+The function adds the number of discs above to the total cost of this state. 
+This is the minimum possible actual cost of a solution path through this state, because at least one move is needed to move each disc above the ``bad'' disc to another peg, and at least one more move to move that disc back onto the Goal Peg.
+For the other two pegs, the desired order is in reverse so that the discs can be easily placed onto the Goal Peg when possible. 
+All discs out of desired order on Non-Goal Pegs (Pegs B\&C) are assigned a cost of 1, because at least one move will be necessary to move them to the Goal Peg.  
+Figure~\ref{outOfPlaceDescrip} illustrates an example of how the heuristic function works.
+
+Because our argument for the number of necessary moves is very bare minimum, our heuristic cannot overestimate the cost to the goal.
+Additionally, the formulation above corresponds to the relaxed problem where we can place a disc anywhere on the destination peg, but keep the restriction of only removing from the top of the source peg.
+Last, we also implemented a weighted version of this function, where weights were in the range \{0,1\}.
+If the function described above is admissible, then the weighted version must be since multiplying by weights in that range will not increase the estimate, and therefore must maintain admissibility.
 
 \begin{lstlisting}[frame=single]
 
@@ -56,6 +74,20 @@ NumDiscsOutOfPlaceAllPegs( SearchState ) returns Cost
 return Cost
 
 \end{lstlisting}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.7\linewidth]{Diagram1.png}
+\caption{FIXME Matt: can you caption this image? im not sure I follow}
+\label{outOfPlaceDescrip}
+\end{figure}
+
+\textbf{Heuristic Function 2} Is similar to our first heuristic, but we consider the size of the discs as well.
+Namely, if heavy discs are above a wrongfully placed disc, we would like that state to pay a heavy price.
+Thus, we scale based on the difference between the disc we expect at an index vs the disc that is placed there.  
+Note that this may break admissibility, but seems to model the physics of the problem reasonably well.
+Figure~\ref{manhattanDescrip} goes into some further detail on how this heuristic function works
+
 
 \begin{lstlisting}[frame=single]
 
@@ -82,44 +114,41 @@ ManhattanDistanceAllPeg( SearchState )
 
 \end{lstlisting}
 
-\begin{figure}[h!]
-\centering
-\includegraphics[width=0.7\linewidth]{Diagram1.png}
-\caption{FIXME with Content}
-\label{fig:reflex}
-\end{figure}
+
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.7\linewidth]{Diagram2.png}
+\includegraphics[width=0.5\linewidth]{Diagram2.png}
 \caption{FIXME with Content}
-\label{fig:reflex}
+\label{manhattanDescrip}
 \end{figure}
 
 \section{Results}
- we carried out the experiment with two search algorithms(A-Star, Beam Search).  As mentioned previously, we used two heuristic functions one admissible and one in-admissible.  Fig1, Fig2, Fig3 show the plots of number of nodes expanded, CPU Clock time in log-scale, Depth of the search tree w.r.t to problem size. 
+We carried out the experiment with two search algorithms(A-Star, Beam Search).
+  As mentioned previously, we used two heuristic functions one admissible and one in-admissible.
+Table~\ref{my-label} illustrates one view of our timing results.
 
 
 
 \begin{table}[h!]
 \centering
-\caption{Table showing the results for A-Star search algorithm. Failures column indicate number of times the function failed.}
+\caption{Table showing the results for A-Star search algorithm. Failures column indicate number of times the function failed. We ran this data giving a mere 500 iterations, since our inadmissible heuristic was easily solving it in an order of magnitude fewer iterations}
 \label{my-label}
 \begin{tabular}{|l|l|l|l|l|l|}
 \hline
-\textbf{Heuristic Function} & \textbf{Problem Size} & \textbf{Failures} & \textbf{Solution Depth} & \textbf{Nodes Expanded} & \textbf{CPU Time} \\ \hline
-In Admissible               & 3                     & 0                 & 5                           & 6                           & 0.00282839999995        \\ \hline
-In Admissible               & 4                     & 0                 & 7                           & 8                           & 0.00612550000004        \\ \hline
-In Admissible               & 5                     & 0                 & 11                          & 12                          & 0.01271615              \\ \hline
-In Admissible               & 6                     & 0                 & 14                          & 16                          & ,0.0214712              \\ \hline
-In Admissible               & 7                     & 0                 & 16                          & 18                          & 0.0295876               \\ \hline
-In Admissible               & 8                     & 0                 & 19                          & 25                          & 0.05099955              \\ \hline
-In Admissible               & 9                     & 0                 & 23                          & 31                          & 0.0776069               \\ \hline
-In Admissible               & 10                    & 0                 & 26                          & 40                          & 0.1196321               \\ \hline
-Admissible                  & 3                     & 0                 & 5                           & 15                          & 0.00789120000004,       \\ \hline
+\textbf{Heuristic Fn} & \textbf{Problem Size} & \textbf{Failures} & \textbf{Solution Depth} & \textbf{Nodes Expanded} & \textbf{CPU Time} \\ \hline
+In Admissible               & 3                     & 0                 & 5                           & 6                           & 0.002828        \\ \hline
+In Admissible               & 4                     & 0                 & 7                           & 8                           & 0.006125       \\ \hline
+In Admissible               & 5                     & 0                 & 11                          & 12                          & 0.012716              \\ \hline
+In Admissible               & 6                     & 0                 & 14                          & 16                          & 0.021471             \\ \hline
+In Admissible               & 7                     & 0                 & 16                          & 18                          & 0.029587               \\ \hline
+In Admissible               & 8                     & 0                 & 19                          & 25                          & 0.050999              \\ \hline
+In Admissible               & 9                     & 0                 & 23                          & 31                          & 0.077606               \\ \hline
+In Admissible               & 10                    & 0                 & 26                          & 40                          & 0.119632               \\ \hline
+Admissible                  & 3                     & 0                 & 5                           & 15                          & 0.007891      \\ \hline
 Admissible                  & 4                     & 0                 & 7                           & 57                          & 0.054209                \\ \hline
-Admissible                  & 5                     & 6                 & 7                           & 163                         & 0.3248069               \\ \hline
-Admissible                  & 6                     & 18                & 1                           & 29                          & 0.08015595              \\ \hline
+Admissible                  & 5                     & 6                 & 7                           & 163                         & 0.324806               \\ \hline
+Admissible                  & 6                     & 18                & 1                           & 29                          & 0.080155              \\ \hline
 \end{tabular}
 \end{table}
 
@@ -154,7 +183,34 @@ Admissible                  & 6                     & 18                & 1     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{Question}{1}Show an example solution sequence for each algorithm for the largest size you tested in the following format:
 We tested for disc size of 10 and peg size of 3. 
+Additional solution sequences may be found in our attached file \texttt{solutions-10-hb.txt}, here is one of the shorter ones:
 
+\begin{verbatim}
+d: 23 h:	0	[[9, 8, 7, 6, 5, 4, 3, 2, 1, 0], [], []]
+d: 22 h:	1	[[9, 8, 7, 6, 5, 4, 3, 2, 1], [], [0]]
+d: 21 h:	2	[[9, 8, 7, 6, 5, 4, 3, 2], [], [0, 1]]
+d: 20 h:	3	[[9, 8, 7, 6, 5, 4, 3], [2], [0, 1]]
+d: 19 h:	4	[[9, 8, 7, 6, 5, 4, 3], [2, 1], [0]]
+d: 18 h:	5	[[9, 8, 7, 6, 5, 4], [2, 1], [0, 3]]
+d: 17 h:	6	[[9, 8, 7, 6, 5], [2, 1, 4], [0, 3]]
+d: 16 h:	7	[[9, 8, 7, 6, 5], [2, 1, 4, 3], [0]]
+d: 15 h:	8	[[9, 8, 7, 6], [2, 1, 4, 3], [0, 5]]
+d: 14 h:	9	[[9, 8, 7], [2, 1, 4, 3, 6], [0, 5]]
+d: 13 h:	10	[[9, 8], [2, 1, 4, 3, 6], [0, 5, 7]]
+d: 12 h:	11	[[9], [2, 1, 4, 3, 6], [0, 5, 7, 8]]
+d: 11 h:	12	[[], [2, 1, 4, 3, 6], [0, 5, 7, 8, 9]]
+d: 10 h:	16	[[6], [2, 1, 4, 3], [0, 5, 7, 8, 9]]
+d: 9 h:	21	[[6, 3], [2, 1, 4], [0, 5, 7, 8, 9]]
+d: 8 h:	24	[[6, 3, 9], [2, 1, 4], [0, 5, 7, 8]]
+d: 7 h:	27	[[6, 3, 9, 4], [2, 1], [0, 5, 7, 8]]
+d: 6 h:	31	[[6, 3, 9, 4, 8], [2, 1], [0, 5, 7]]
+d: 5 h:	34	[[6, 3, 9, 4, 8, 1], [2], [0, 5, 7]]
+d: 4 h:	36	[[6, 3, 9, 4, 8, 1, 2], [], [0, 5, 7]]
+d: 3 h:	36	[[6, 3, 9, 4, 8, 1, 2], [7], [0, 5]]
+d: 2 h:	40	[[6, 3, 9, 4, 8, 1, 2, 5], [7], [0]]
+d: 1 h:	42	[[6, 3, 9, 4, 8, 1, 2, 5, 0], [7], []]
+d: 0 h:	50	[[6, 3, 9, 4, 8, 1, 2, 5, 0, 7], [], []]
+\end{verbatim}
 
 \end{Question}
 
@@ -165,6 +221,7 @@ We tested for disc size of 10 and peg size of 3.
 \begin{Question}{2}How did the search time and the solution quality vary with the beam width? Is there a beam width that gives the best tradeoff for the two heuristics?
 
 Up to a beam width of about 20, the search time increased only modestly. At 20 it increased significantly. With the inadmissible heuristic, the solution quality did not vary, but with the admissible heuristic, there was some improvement of solution quality as beam width increased.
+It is also notable that with the admissible heuristic, we started having searches take $>$500 iterations as beam width became large.
 
 \end{Question}
 
@@ -189,6 +246,23 @@ A* tree search using an admissible heuristic guarantees an optimal solution, but
 
 As observed above in (3), our inadmissible heuristic function enabled all searches to expand a number of nodes approximately linear in the problem size, whereas the complexity associated with the admissible heuristic appears to be exponential. 
 
+Now, to discuss how much optimality is lost, we have provided 2 files, \texttt{solutions-6-aa.txt} and \texttt{solutions-6-hb-txt}, which contain the results of applying A* search with an admissible heuristic, and our inadmissible heuristic using a beam search, respectively.
+Table~\ref{optimal} summarizes the comparison of the solutions found in these two files.  
+We found that solution quality did not degrade much at lower problem sizes, though the time cost of obtaining an optimal solution at solution size 10 was daunting, so we do not have that data.
+
+\begin{table}[h!]
+\centering
+\caption{Table showing quality of nonoptimal solutions for problems of size 6.  Optimal solution was obtained via A* search (first line) and an admissible heuristic. The non optimal search uses beam search and our inadmissible heuristic (second line).  The third line shows the difference for easier comparison.  Of the 20 inputs, there were 10 optimal solutions, and 7 solutions within 1 solution depth.}
+\label{optimal}
+\begin{tabular}{lllll|lllll|lllll|lllll|}
+15 & 13 & 14 & 12 & 15 & 12 & 11 & 14 & 15 & 14 & 12 & 14 & 11 & 13 & 14 & 15 & 12 & 12 & 15 & 14\\
+16 & 16 & 14 & 13 & 16 & 12 & 11 & 14 & 16 & 14 & 12 & 18 & 10 & 13 & 15 & 18 & 12 & 12 & 16 & 14\\
+\hline
+1   & 3   &      & 1   &   1 &      &      &      &  1  &      &      &   4 &  1  &      & 1   &  3  &      &      &  1  &  \\
+\end{tabular}
+\end{table}
+
+
 \end{Question}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -196,9 +270,11 @@ As observed above in (3), our inadmissible heuristic function enabled all search
 \begin{Question}{5}How did you come up with your heuristic evaluation functions?
 Our admissible heuristic function, Function 1, is based on the simplified problem that if a disc on Peg A is out of solution order, every disc above it must be moved. Similarly, every disc on Pegs B and C that is not sorted in reverse order also represents an extra move to get that disc out of the way.
 
-Function 2, our inadmissible heuristic, was inspired by the ‚ÄúManhattan Distance‚Äù heuristic. Each disc on Peg A from position 0 up that is in order is already at the ‚Äúdestination.‚Äù After a disc is found out of order, each disc incurs an extra cost of the absolute value of the delta between the desired disc ‚Äúsize‚Äù and actual disc ‚Äúsize.‚Äù This lets our search algorithm know that if Peg A is ‚Äúapproximately‚Äù in order, this is closer to the solution. 
+Function 2, our inadmissible heuristic, was inspired by the ``Manhattan Distance'' heuristic. Each disc on Peg A from position 0 up that is in order is already at the ``Äúdestination.''Äù After a disc is found out of order, each disc incurs an extra cost of the absolute value of the delta between the desired disc ``Äúsize'' and actual disc ``Äúsize.''Äù This lets our search algorithm know that if Peg A is ``approximately''Äù in order, this is closer to the solution. 
 
-On the other pegs, we decided to sum the deltas in ‚Äúsize‚Äù between each disc and each lower-numbered disc above it, adding the sum of all of these to the total cost, because states with Pegs B and C stacked in ascending order from bottom to top should be favored.
+On the other pegs, we decided to sum the deltas in ``size'' between each disc and each lower-numbered disc above it, adding the sum of all of these to the total cost, because states with Pegs B and C stacked in ascending order from bottom to top should be favored.
+
+Early on, we tested some heuristics which did not examine the non-goal pegs and found those did not work very well.
 
 
 \end{Question}
@@ -220,7 +296,8 @@ Our admissible heuristic would not scale well to larger problems because it incr
 
 The curves for the admissible heuristic also increase more steeply as the beam width increases toward infinite width.
 
-
+We tested some problems of size 11, but found that it was not worth waiting around for them to finish.
+It is possible that imperfect data structure choice limited our performance for this test, since our implementation does not use a hash table to store the search frontier or explored region.
 
 \end{Question}
 
@@ -231,7 +308,7 @@ The curves for the admissible heuristic also increase more steeply as the beam w
 
 \begin{Question}{8}Is there any tradeoff between how good a heuristic is in cutting down the number of nodes and how long it took to compute? Can you quantify it?
 
-
+In our case yes, since our admissible heuristic runs as $O(n)$, where $n$ is the number of discs, while our inadmissible heuristic runs as $O(n^2)$.
 
 
 \end{Question}
@@ -239,7 +316,88 @@ The curves for the admissible heuristic also increase more steeply as the beam w
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{Question}{9}Is there anything else you found that is of interest?
+Our implementation made it pretty easy to increase the number of pegs used in the test.
+We figured that the results would be that adding pegs would increase the search time, since the branching factor increases quite sharply.  However, as the number of pegs approaches the number of discs, a trivial solution becomes available.  Our inadmissible heuristic did not seem able to reliably find that trivial solution.
 
+First, here is the data table associated with those tests, and it will be followed by a solution that our program found with a high peg count
+
+\begin{table}[h!]
+\centering
+\caption{Table showing the results for varying peg count's effect on number of nodes expanded.  Problems of size 9 discs were examined in this study (5x problems, one per row)}
+\label{pegCount}
+\begin{tabular}{l|lll|lll|ll}
+Peg count & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10\\
+\hline
+& 90	 & 131& 	 170& 	 202& 	 409& 	 991& 	 1117& 	 1251\\
+& 95	 & 135& 	 175	&  207& 	 866	&  461& 	 1116& 	 1249\\
+& 239& 	 555& 	 428& 	 201& 	 730	&  796& 	 841	&  704\\
+& 708& 	 3001& 	 3227& 	 3951& 	 5732& 	 2558& 	 3340& 	 2818\\
+& 92	 & 141& 	 200& 	 254& 	 307	&  364& 	 427	&  496
+\end{tabular}
+\end{table}
+
+							
+
+\begin{verbatim}
+d: 55 h:	0.0	[[9, 8, 7, 6, 5, 4, 3, 2, 1, 0], [], [], [], [], [], [], [], [], []]
+d: 54 h:	0.0	[[9, 8, 7, 6, 5, 4, 3, 2, 1], [0], [], [], [], [], [], [], [], []]
+d: 53 h:	0.0	[[9, 8, 7, 6, 5, 4, 3, 2], [0, 1], [], [], [], [], [], [], [], []]
+d: 52 h:	0.0	[[9, 8, 7, 6, 5, 4, 3], [0, 1, 2], [], [], [], [], [], [], [], []]
+d: 51 h:	0.0	[[9, 8, 7, 6, 5, 4], [0, 1, 2, 3], [], [], [], [], [], [], [], []]
+d: 50 h:	0.0	[[9, 8, 7, 6, 5], [0, 1, 2, 3, 4], [], [], [], [], [], [], [], []]
+d: 49 h:	2.0	[[9, 8, 7, 6], [0, 1, 2, 3, 4], [5], [], [], [], [], [], [], []]
+d: 48 h:	2.4	[[9, 8, 7, 6, 4], [0, 1, 2, 3], [5], [], [], [], [], [], [], []]
+d: 47 h:	1.0	[[9, 8, 7, 6, 4, 5], [0, 1, 2, 3], [], [], [], [], [], [], [], []]
+d: 46 h:	1.42857142857	[[9, 8, 7, 6, 4, 5, 3], [0, 1, 2], [], [], [], [], [], [], [], []]
+d: 45 h:	3.42857142857	[[9, 8, 7, 6, 4, 5, 3], [0, 1], [], [2], [], [], [], [], [], []]
+d: 44 h:	3.5	[[9, 8, 7, 6, 4, 5], [0, 1], [], [2, 3], [], [], [], [], [], []]
+d: 43 h:	3.56666666667	[[9, 8, 7, 6, 4], [0, 1, 5], [], [2, 3], [], [], [], [], [], []]
+d: 42 h:	3.15	[[9, 8, 7, 6, 4], [0, 1, 5, 3], [], [2], [], [], [], [], [], []]
+d: 41 h:	2.8	[[9, 8, 7, 6], [0, 1, 5, 3, 4], [], [2], [], [], [], [], [], []]
+d: 40 h:	1.2	[[9, 8, 7, 6, 2], [0, 1, 5, 3, 4], [], [], [], [], [], [], [], []]
+d: 39 h:	1.41666666667	[[9, 8, 7, 6, 2, 4], [0, 1, 5, 3], [], [], [], [], [], [], [], []]
+d: 38 h:	3.33333333333	[[9, 8, 7, 6, 2, 4], [0, 1, 5], [], [3], [], [], [], [], [], []]
+d: 37 h:	3.14285714286	[[9, 8, 7, 6, 2, 4, 5], [0, 1], [], [3], [], [], [], [], [], []]
+d: 38 h:	1.75	[[9, 8, 7, 6, 2, 4, 5, 3], [0, 1], [], [], [], [], [], [], [], []]
+d: 37 h:	2.22222222222	[[9, 8, 7, 6, 2, 4, 5, 3, 1], [0], [], [], [], [], [], [], [], []]
+d: 36 h:	2.22222222222	[[9, 8, 7, 6, 2, 4, 5, 3, 1], [], [0], [], [], [], [], [], [], []]
+d: 35 h:	1.75	[[9, 8, 7, 6, 2, 4, 5, 3], [], [0, 1], [], [], [], [], [], [], []]
+d: 34 h:	3.14285714286	[[9, 8, 7, 6, 2, 4, 5], [], [0, 1], [3], [], [], [], [], [], []]
+d: 33 h:	3.16666666667	[[9, 8, 7, 6, 2, 4], [], [0, 1], [3, 5], [], [], [], [], [], []]
+d: 32 h:	3.4	[[9, 8, 7, 6, 2], [], [0, 1], [3, 5, 4], [], [], [], [], [], []]
+d: 31 h:	3.0	[[9, 8, 7, 6], [], [0, 1, 2], [3, 5, 4], [], [], [], [], [], []]
+d: 30 h:	2.9	[[9, 8, 7, 6, 4], [], [0, 1, 2], [3, 5], [], [], [], [], [], []]
+d: 29 h:	2.9	[[9, 8, 7, 6, 4], [], [0, 1, 2, 5], [3], [], [], [], [], [], []]
+d: 28 h:	2.6	[[9, 8, 7, 6], [], [0, 1, 2, 5, 4], [3], [], [], [], [], [], []]
+d: 27 h:	1.0	[[9, 8, 7, 6], [], [0, 1, 2, 5, 4, 3], [], [], [], [], [], [], []]
+d: 26 h:	3.0	[[9, 8, 7], [], [0, 1, 2, 5, 4, 3], [6], [], [], [], [], [], []]
+d: 25 h:	3.1	[[9, 8, 7], [], [0, 1, 2, 5, 4], [6, 3], [], [], [], [], [], []]
+d: 24 h:	3.5	[[9, 8, 7], [], [0, 1, 2, 5], [6, 3, 4], [], [], [], [], [], []]
+d: 23 h:	3.5	[[9, 8, 7, 5], [], [0, 1, 2], [6, 3, 4], [], [], [], [], [], []]
+d: 22 h:	4.2	[[9, 8, 7, 5, 2], [], [0, 1], [6, 3, 4], [], [], [], [], [], []]
+d: 21 h:	4.7	[[9, 8, 7, 5, 2], [], [0], [6, 3, 4, 1], [], [], [], [], [], []]
+d: 20 h:	4.5	[[9, 8, 7, 5], [], [0], [6, 3, 4, 1, 2], [], [], [], [], [], []]
+d: 19 h:	4.16666666667	[[9, 8, 7], [], [0], [6, 3, 4, 1, 2, 5], [], [], [], [], [], []]
+d: 18 h:	5.16666666667	[[9, 8], [], [0, 7], [6, 3, 4, 1, 2, 5], [], [], [], [], [], []]
+d: 17 h:	5.66666666667	[[9, 8], [], [0, 7, 5], [6, 3, 4, 1, 2], [], [], [], [], [], []]
+d: 16 h:	5.75	[[9, 8], [], [0, 7, 5, 2], [6, 3, 4, 1], [], [], [], [], [], []]
+d: 15 h:	5.8	[[9, 8], [], [0, 7, 5, 2, 1], [6, 3, 4], [], [], [], [], [], []]
+d: 14 h:	6.33333333333	[[9], [], [0, 7, 5, 2, 1, 8], [6, 3, 4], [], [], [], [], [], []]
+d: 13 h:	6.35714285714	[[9], [], [0, 7, 5, 2, 1, 8, 4], [6, 3], [], [], [], [], [], []]
+d: 12 h:	6.875	[[], [], [0, 7, 5, 2, 1, 8, 4, 9], [6, 3], [], [], [], [], [], []]
+d: 11 h:	6.88888888889	[[], [], [0, 7, 5, 2, 1, 8, 4, 9, 3], [6], [], [], [], [], [], []]
+d: 10 h:	6.88888888889	[[6], [], [0, 7, 5, 2, 1, 8, 4, 9, 3], [], [], [], [], [], [], []]
+d: 9 h:	7.375	[[6, 3], [], [0, 7, 5, 2, 1, 8, 4, 9], [], [], [], [], [], [], []]
+d: 8 h:	7.85714285714	[[6, 3, 9], [], [0, 7, 5, 2, 1, 8, 4], [], [], [], [], [], [], []]
+d: 7 h:	8.33333333333	[[6, 3, 9, 4], [], [0, 7, 5, 2, 1, 8], [], [], [], [], [], [], []]
+d: 6 h:	8.8	[[6, 3, 9, 4, 8], [], [0, 7, 5, 2, 1], [], [], [], [], [], [], []]
+d: 5 h:	9.25	[[6, 3, 9, 4, 8, 1], [], [0, 7, 5, 2], [], [], [], [], [], [], []]
+d: 4 h:	9.66666666667	[[6, 3, 9, 4, 8, 1, 2], [], [0, 7, 5], [], [], [], [], [], [], []]
+d: 3 h:	10.0	[[6, 3, 9, 4, 8, 1, 2, 5], [], [0, 7], [], [], [], [], [], [], []]
+d: 2 h:	11.0	[[6, 3, 9, 4, 8, 1, 2, 5], [7], [0], [], [], [], [], [], [], []]
+d: 1 h:	12.0	[[6, 3, 9, 4, 8, 1, 2, 5, 0], [7], [], [], [], [], [], [], [], []]
+d: 0 h:	11.0	[[6, 3, 9, 4, 8, 1, 2, 5, 0, 7], [], [], [], [], [], [], [], [], []]
+\end{verbatim}
 
 \end{Question}
 
